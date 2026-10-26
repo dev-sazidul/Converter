@@ -6,6 +6,8 @@ storage/
 node_modules/
 dist/
 .env
+data/
+*.pem
 .DS_Store
 *.tsbuildinfo
 coverage/

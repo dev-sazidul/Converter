@@ -373,3 +373,32 @@ def test_expired_jobs_and_startup_purge(make_client, tmp_path, monkeypatch):
     expired = short.get(created.json()["download_url"])
     assert expired.status_code == 404
     assert expired.json()["error"]["code"] == "not_found"
+
+
+def test_ready_download_survives_a_new_process(tmp_path, monkeypatch):
+    storage = tmp_path / "keep"
+    monkeypatch.setenv("STORAGE_DIR", str(storage))
+    monkeypatch.setenv("JOB_TTL_SECONDS", "3600")
+    from app.config import get_settings
+    from app.main import create_app
+
+    get_settings.cache_clear()
+    with TestClient(create_app()) as first:
+        created = first.post(
+            "/api/v1/tools/merge",
+            files=_files(
+                ("a.pdf", pdf_bytes(["A"]), "application/pdf"),
+                ("b.pdf", pdf_bytes(["B"]), "application/pdf"),
+            ),
+        )
+        assert created.status_code == 200, created.text
+        download_url = created.json()["download_url"]
+        original = first.get(download_url)
+        assert original.status_code == 200
+        assert original.content.startswith(b"%PDF")
+
+    get_settings.cache_clear()
+    with TestClient(create_app()) as second:
+        restored = second.get(download_url)
+        assert restored.status_code == 200
+        assert restored.content == original.content

@@ -7,6 +7,7 @@ a filesystem path to the client.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
@@ -60,14 +61,23 @@ class JobStore:
         self._lock = threading.Lock()
 
     def prepare(self) -> None:
-        """Create storage and drop leftovers from a previous process."""
+        """Create storage, restore unexpired downloads, and drop incomplete leftovers.
+
+        A finished job is recorded in ``job.json`` inside its directory. Replacing
+        the container reloads those jobs. Directories without a valid record are
+        removed. This never deletes the storage directory itself.
+        """
         self.root.mkdir(parents=True, exist_ok=True)
         self.root = self.root.resolve()
         os.chmod(self.root, 0o700)
         with self._lock:
             self._jobs.clear()
             for child in list(self.root.iterdir()):
-                self._remove_path(child)
+                job = self._load_job(child)
+                if job is None or self._expired(job):
+                    self._remove_path(child)
+                    continue
+                self._jobs[job.id] = job
 
     def create(self, tool: str) -> Job:
         job_id = str(uuid.uuid4())
@@ -93,6 +103,7 @@ class JobStore:
             current.download_name = result.download_name
             current.media_type = result.media_type
             current.meta = result.meta
+            self._write_manifest(current)
             current.status = "ready"
 
     def discard(self, job: Job) -> None:
@@ -132,6 +143,65 @@ class JobStore:
 
     def _expired(self, job: Job) -> bool:
         return (time.time() - job.created_at) >= self.ttl_seconds
+
+    def _write_manifest(self, job: Job) -> None:
+        if job.output_path is None or not job.download_name or not job.media_type:
+            raise ProcessingFailedError()
+        relative = job.output_path.resolve().relative_to(job.directory.resolve()).as_posix()
+        payload = {
+            "id": job.id,
+            "tool": job.tool,
+            "created_at": job.created_at,
+            "status": "ready",
+            "output": relative,
+            "download_name": job.download_name,
+            "media_type": job.media_type,
+            "meta": job.meta,
+        }
+        temporary = job.directory / "job.json.tmp"
+        target = job.directory / "job.json"
+        temporary.write_text(json.dumps(payload), encoding="utf-8")
+        os.chmod(temporary, 0o600)
+        temporary.replace(target)
+
+    def _load_job(self, directory: Path) -> Job | None:
+        if not directory.is_dir() or directory.is_symlink() or not _JOB_ID.match(directory.name):
+            return None
+        manifest_path = directory / "job.json"
+        if not manifest_path.is_file() or manifest_path.is_symlink():
+            return None
+        try:
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+            output_rel = str(payload["output"])
+            if payload["id"] != directory.name or payload["status"] != "ready":
+                return None
+            if not output_rel or output_rel.startswith("/") or ".." in Path(output_rel).parts:
+                return None
+            output = (directory / output_rel).resolve()
+            root = directory.resolve()
+            if not output.is_file() or not output.is_relative_to(root):
+                return None
+            created_at = float(payload["created_at"])
+            meta = payload.get("meta") or {}
+            if not isinstance(meta, dict):
+                return None
+            clean_meta: dict[str, int | float | str] = {}
+            for key, value in meta.items():
+                if isinstance(value, (int, float, str)) and isinstance(key, str):
+                    clean_meta[key] = value
+            return Job(
+                id=directory.name,
+                tool=str(payload["tool"]),
+                directory=directory,
+                created_at=created_at,
+                status="ready",
+                output_path=output,
+                download_name=str(payload["download_name"]),
+                media_type=str(payload["media_type"]),
+                meta=clean_meta,
+            )
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+            return None
 
     def _remove_path(self, path: Path) -> None:
         if not path.exists() and not path.is_symlink():

@@ -20,6 +20,7 @@ Last updated: 2026-10-26
 - Coming soon entries for office conversion, HTML to PDF, PDF to PDF/A, editing, OCR, repair, and security tools. They do not process files.
 - Convert PDF page at `/convert-pdf` with Convert to PDF and Convert from PDF. The header labels the landing page Home.
 - Reserved ad spaces under the header, on the home page, on content and tool pages, and above the footer. They show demo creatives until AdSense ids are set in the environment. A closable popup returns 20 seconds after it is dismissed and is not an AdSense unit.
+- Oracle Cloud deployment files: Compose, Nginx proxy, host data directory, and a GitHub Actions workflow that tests, builds images, and deploys over a restricted SSH command. See DEPLOYMENT.md. A live VM deploy was not run from this workspace.
 
 ## Not built
 

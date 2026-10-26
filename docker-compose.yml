@@ -1,6 +1,13 @@
+# Single-VM production stack. Uploads live in ${DATA_DIR}/storage on the host,
+# outside the container writable layer. Do not run `docker compose down -v`.
+
+name: convarter
+
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+    image: convarter-backend:${IMAGE_TAG:-local}
     environment:
       ENVIRONMENT: production
       STORAGE_DIR: /data/storage
@@ -11,12 +18,12 @@ services:
       MAX_PAGES: ${MAX_PAGES:-150}
       JOB_TTL_SECONDS: ${JOB_TTL_SECONDS:-3600}
       CLEANUP_INTERVAL_SECONDS: ${CLEANUP_INTERVAL_SECONDS:-300}
+      MAX_IMAGE_PIXELS: ${MAX_IMAGE_PIXELS:-40000000}
+      ALLOWED_DPI: ${ALLOWED_DPI:-96,150,200}
     volumes:
-      - pdf-storage:/data/storage
+      - ${DATA_DIR:-./data}/storage:/data/storage
     expose:
       - "8000"
-    ports:
-      - "127.0.0.1:8000:8000"
     healthcheck:
       test:
         [
@@ -28,25 +35,65 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 25s
     restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
 
   frontend:
     build:
       context: ./frontend
       args:
         VITE_API_URL: ""
-    ports:
-      - "8080:80"
+        VITE_ADSENSE_CLIENT: ${VITE_ADSENSE_CLIENT:-}
+        VITE_ADSENSE_SLOT_HEADER: ${VITE_ADSENSE_SLOT_HEADER:-}
+        VITE_ADSENSE_SLOT_HOME: ${VITE_ADSENSE_SLOT_HOME:-}
+        VITE_ADSENSE_SLOT_CONTENT: ${VITE_ADSENSE_SLOT_CONTENT:-}
+        VITE_ADSENSE_SLOT_TOOL: ${VITE_ADSENSE_SLOT_TOOL:-}
+        VITE_ADSENSE_SLOT_FOOTER: ${VITE_ADSENSE_SLOT_FOOTER:-}
+    image: convarter-frontend:${IMAGE_TAG:-local}
+    expose:
+      - "80"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1/healthz"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 10s
     restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+
+  proxy:
+    build:
+      context: ./deploy/proxy
+    image: convarter-proxy:${IMAGE_TAG:-local}
+    environment:
+      DOMAIN: ${DOMAIN:-_}
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - ${DATA_DIR:-./data}/certbot:/etc/letsencrypt
+      - ${DATA_DIR:-./data}/certbot-www:/var/www/certbot
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    init: true
 
   postgres:
     profiles: ["full"]
@@ -58,7 +105,7 @@ services:
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-convarter}"]
       interval: 10s
@@ -72,7 +119,3 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
     restart: unless-stopped
-
-volumes:
-  pdf-storage:
-  pg-data:
