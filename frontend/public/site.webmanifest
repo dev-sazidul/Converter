@@ -1,0 +1,16 @@
+{
+  "name": "Convarter",
+  "short_name": "Convarter",
+  "description": "Merge, split, compress, rotate, and convert PDFs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F3F6F5",
+  "theme_color": "#0C5F5A",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

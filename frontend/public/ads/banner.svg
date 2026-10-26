@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="728" height="90" viewBox="0 0 728 90" role="img" aria-label="Demo banner advertisement">
+  <rect width="728" height="90" fill="#E7F4F2"/>
+  <rect x="0" y="0" width="8" height="90" fill="#0C5F5A"/>
+  <circle cx="58" cy="45" r="22" fill="#0C5F5A"/>
+  <path d="M50 45h16M58 37v16" stroke="#F3F6F5" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="96" y="40" fill="#132421" font-family="Plus Jakarta Sans, ui-sans-serif, sans-serif" font-size="18" font-weight="650">Demo banner</text>
+  <text x="96" y="62" fill="#5C6F6B" font-family="Plus Jakarta Sans, ui-sans-serif, sans-serif" font-size="13">Replace this image with your AdSense unit</text>
+</svg>
