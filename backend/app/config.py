@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     cleanup_interval_seconds: int = 300
     max_image_pixels: int = 40_000_000
     allowed_dpi: str = "96,150,200"
+    conversion_timeout_seconds: int = 120
+    html_navigation_timeout_seconds: int = 25
+    pdfa_icc_path: str = ""
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),
@@ -39,6 +42,8 @@ class Settings(BaseSettings):
         "max_pages",
         "cleanup_interval_seconds",
         "max_image_pixels",
+        "conversion_timeout_seconds",
+        "html_navigation_timeout_seconds",
     )
     @classmethod
     def must_be_positive(cls, value: int) -> int:

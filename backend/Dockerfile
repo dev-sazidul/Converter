@@ -15,16 +15,38 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     STORAGE_DIR=/data/storage
 
-# PyMuPDF and its ONNX runtime need these shared libraries at process start.
+# PyMuPDF needs libglib, libgl, and libgomp. Office conversion needs LibreOffice,
+# PDF/A needs Ghostscript, and HTML to PDF needs Chromium from Playwright.
+# These are the conversion engines. They make the image larger on purpose.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libglib2.0-0 libgl1 libgomp1 \
+    && apt-get install -y --no-install-recommends \
+        libglib2.0-0 \
+        libgl1 \
+        libgomp1 \
+        ghostscript \
+        fonts-liberation \
+        fontconfig \
+        libreoffice-writer \
+        libreoffice-calc \
+        libreoffice-impress \
+        libxinerama1 \
+        libxrender1 \
+        libxext6 \
+        libsm6 \
+        libice6 \
+        libcairo2 \
+        libcups2 \
     && rm -rf /var/lib/apt/lists/*
+
+COPY --from=packages /install /usr/local
+RUN python -m playwright install --with-deps chromium \
+    && chmod -R a+rX /ms-playwright
 
 RUN adduser --disabled-password --gecos "" --uid 10001 appuser \
     && mkdir -p /data/storage \
     && chown appuser:appuser /data/storage
 
-COPY --from=packages /install /usr/local
 WORKDIR /app
 COPY app ./app
 

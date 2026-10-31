@@ -14,6 +14,10 @@ export type ToolOptions = {
   pageSize: "fit" | "a4" | "letter";
   orientation: "portrait" | "landscape";
   margin: "none" | "small" | "medium";
+  slideMode: "editable" | "image";
+  pdfaLevel: "1b" | "2b" | "3b";
+  htmlSource: "file" | "url";
+  htmlUrl: string;
 };
 
 export const defaultOptions: ToolOptions = {
@@ -29,21 +33,163 @@ export const defaultOptions: ToolOptions = {
   pageSize: "fit",
   orientation: "portrait",
   margin: "small",
+  slideMode: "editable",
+  pdfaLevel: "2b",
+  htmlSource: "file",
+  htmlUrl: "",
 };
 
 const PAGE_TOKEN = /^\d+(-\d+)?$/;
 
+const CONTENT_SLUGS = new Set([
+  "jpg-to-pdf",
+  "pdf-to-word",
+  "word-to-pdf",
+  "pdf-to-excel",
+  "excel-to-pdf",
+  "pdf-to-powerpoint",
+  "powerpoint-to-pdf",
+  "html-to-pdf",
+  "pdf-to-pdfa",
+]);
+
+export function unsupportedFileMessage(name: string, tool: ToolDefinition): string {
+  if (tool.slug === "jpg-to-pdf") {
+    return `“${name}” isn't a JPG or JPEG file. Only .jpg and .jpeg images can be added.`;
+  }
+  if (tool.slug === "word-to-pdf") {
+    return `“${name}” isn't a Word file. Only .doc and .docx documents can be added.`;
+  }
+  if (tool.slug === "excel-to-pdf") {
+    return `“${name}” isn't an Excel file. Only .xls and .xlsx spreadsheets can be added.`;
+  }
+  if (tool.slug === "powerpoint-to-pdf") {
+    return `“${name}” isn't a PowerPoint file. Only .ppt and .pptx decks can be added.`;
+  }
+  if (tool.slug === "html-to-pdf") {
+    return `“${name}” isn't an HTML file. Only .html and .htm files can be added.`;
+  }
+  if (tool.accept.includes("application/pdf") || tool.accept.includes(".pdf")) {
+    return `“${name}” isn't a PDF.`;
+  }
+  return `“${name}” isn't a ${tool.acceptLabel} file.`;
+}
+
 export function fileCap(tool: ToolDefinition, limits: Limits): number {
   return Math.min(tool.maxFiles, limits.max_files);
+}
+
+function readHead(file: File, bytes: number): Promise<Uint8Array> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(new Uint8Array(reader.result as ArrayBuffer));
+    reader.onerror = () => reject(reader.error ?? new Error("unreadable file"));
+    reader.readAsArrayBuffer(file.slice(0, bytes));
+  });
+}
+
+function startsWith(head: Uint8Array, magic: number[]): boolean {
+  return magic.every((value, index) => head[index] === value);
+}
+
+const ZIP_MAGIC = [0x50, 0x4b, 0x03, 0x04];
+const OLE_MAGIC = [0xd0, 0xcf, 0x11, 0xe0];
+const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46];
+
+export function isJpegFile(file: File): Promise<boolean> {
+  return readHead(file, 3).then((head) => head.length >= 3 && head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff);
+}
+
+export function needsContentCheck(slug: string): boolean {
+  return CONTENT_SLUGS.has(slug);
+}
+
+export async function matchesContent(file: File, slug: string): Promise<boolean> {
+  if (slug === "jpg-to-pdf") return isJpegFile(file);
+  const head = await readHead(file, slug === "html-to-pdf" ? 512 : 8);
+  const name = file.name.toLowerCase();
+  if (slug === "pdf-to-word" || slug === "pdf-to-excel" || slug === "pdf-to-powerpoint" || slug === "pdf-to-pdfa") {
+    return startsWith(head, PDF_MAGIC);
+  }
+  if (slug === "word-to-pdf") {
+    return name.endsWith(".docx") ? startsWith(head, ZIP_MAGIC) : name.endsWith(".doc") && startsWith(head, OLE_MAGIC);
+  }
+  if (slug === "excel-to-pdf") {
+    return name.endsWith(".xlsx") ? startsWith(head, ZIP_MAGIC) : name.endsWith(".xls") && startsWith(head, OLE_MAGIC);
+  }
+  if (slug === "powerpoint-to-pdf") {
+    return name.endsWith(".pptx") ? startsWith(head, ZIP_MAGIC) : name.endsWith(".ppt") && startsWith(head, OLE_MAGIC);
+  }
+  if (slug === "html-to-pdf") return looksLikeHtml(head);
+  return true;
+}
+
+function looksLikeHtml(head: Uint8Array): boolean {
+  if (
+    startsWith(head, PDF_MAGIC) ||
+    startsWith(head, ZIP_MAGIC) ||
+    startsWith(head, OLE_MAGIC) ||
+    startsWith(head, [0xff, 0xd8, 0xff]) ||
+    startsWith(head, [0x89, 0x50, 0x4e, 0x47])
+  ) {
+    return false;
+  }
+  if (head.includes(0)) return false;
+  const text = new TextDecoder("utf-8", { fatal: false }).decode(head).toLowerCase();
+  return text.includes("<");
 }
 
 export function matchesAccept(file: File, accept: string[]): boolean {
   const type = file.type.toLowerCase();
   if (type && accept.includes(type)) return true;
   const name = file.name.toLowerCase();
-  if (accept.includes("application/pdf") && name.endsWith(".pdf")) return true;
-  if (accept.includes("image/jpeg") && /\.jpe?g$/.test(name)) return true;
+  if ((accept.includes("application/pdf") || accept.includes(".pdf")) && name.endsWith(".pdf")) return true;
+  if (accept.includes("image/jpeg") && (type === "image/jpg" || type === "image/pjpeg" || /\.jpe?g$/.test(name))) {
+    return true;
+  }
   if (accept.includes("image/png") && name.endsWith(".png")) return true;
+  const extension = name.match(/\.[a-z0-9]+$/)?.[0] ?? "";
+  return Boolean(extension && accept.includes(extension));
+}
+
+export function validateHtmlUrl(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return "Enter a web address, including https://.";
+  if (trimmed.length > 2000 || /[\s\\]/.test(trimmed)) return "Enter a public http or https address.";
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    return "Enter a full web address, such as https://example.com.";
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return "Only http and https addresses can be converted.";
+  if (url.username || url.password) return "That address isn't allowed.";
+  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "").replace(/\.$/, "");
+  if (!host || host === "localhost" || host.endsWith(".local") || host.endsWith(".internal") || host.endsWith(".localhost")) {
+    return "That address isn't allowed.";
+  }
+  if (host === "metadata.google.internal" || isBlockedAddress(host)) return "That address isn't allowed.";
+  return null;
+}
+
+function isBlockedAddress(host: string): boolean {
+  if (/^\d+$/.test(host)) {
+    const value = Number(host);
+    if (Number.isSafeInteger(value) && value >= 0 && value <= 0xffffffff) {
+      host = `${(value >>> 24) & 255}.${(value >>> 16) & 255}.${(value >>> 8) & 255}.${value & 255}`;
+    }
+  }
+  const match = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!match) return host === "::1" || host.startsWith("fe80:") || host.startsWith("fc") || host.startsWith("fd");
+  const parts = match.slice(1).map(Number);
+  if (parts.some((part) => part > 255)) return true;
+  const [a, b] = parts;
+  if (a === 10 || a === 127 || a === 0) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;
+  if (a >= 240) return true;
   return false;
 }
 
@@ -86,13 +232,13 @@ export function validateIncomingFiles(
   let error: string | null = null;
   let total = current.reduce((sum, file) => sum + file.size, 0);
   for (const file of incoming) {
+    if (!matchesAccept(file, tool.accept)) {
+      error ??= unsupportedFileMessage(file.name, tool);
+      continue;
+    }
     if (current.length + accepted.length >= max) {
       error ??= `You can add up to ${max} files.`;
       break;
-    }
-    if (!matchesAccept(file, tool.accept)) {
-      error ??= `“${file.name}” isn't a ${tool.acceptLabel} file.`;
-      continue;
     }
     if (file.size <= 0) {
       error ??= `“${file.name}” is empty.`;
@@ -112,7 +258,8 @@ export function validateIncomingFiles(
   return { accepted, error };
 }
 
-export function validateReady(files: File[], tool: ToolDefinition, limits: Limits): string | null {
+export function validateReady(files: File[], tool: ToolDefinition, limits: Limits, options?: ToolOptions): string | null {
+  if (tool.slug === "html-to-pdf" && options?.htmlSource === "url") return null;
   if (files.length < tool.minFiles) return tool.minMessage;
   if (files.length > fileCap(tool, limits)) {
     return `You can add up to ${fileCap(tool, limits)} files.`;
@@ -120,7 +267,7 @@ export function validateReady(files: File[], tool: ToolDefinition, limits: Limit
   const maxBytes = limits.max_file_size_mb * 1024 * 1024;
   const total = files.reduce((sum, file) => sum + file.size, 0);
   for (const file of files) {
-    if (!matchesAccept(file, tool.accept)) return `“${file.name}” isn't a ${tool.acceptLabel} file.`;
+    if (!matchesAccept(file, tool.accept)) return unsupportedFileMessage(file.name, tool);
     if (file.size > maxBytes) {
       return `“${file.name}” is larger than the ${limits.max_file_size_mb} MB limit.`;
     }
@@ -141,6 +288,9 @@ export function validateOptions(tool: ToolDefinition, options: ToolOptions): str
   }
   if ((tool.slug === "rotate-pdf" || tool.slug === "pdf-to-jpg") && options.pageMode === "custom") {
     return validatePageList(options.pages);
+  }
+  if (tool.slug === "html-to-pdf" && options.htmlSource === "url") {
+    return validateHtmlUrl(options.htmlUrl);
   }
   return null;
 }
@@ -165,5 +315,12 @@ export function appendOptions(form: FormData, tool: ToolDefinition, options: Too
     form.set("page_size", options.pageSize);
     form.set("orientation", options.orientation);
     form.set("margin", options.margin);
+  }
+  if (tool.slug === "pdf-to-powerpoint") form.set("mode", options.slideMode);
+  if (tool.slug === "pdf-to-pdfa") form.set("level", options.pdfaLevel);
+  if (tool.slug === "html-to-pdf") {
+    form.set("source", options.htmlSource);
+    form.set("url", options.htmlSource === "url" ? options.htmlUrl.trim() : "");
+    form.set("page_size", options.pageSize === "letter" ? "letter" : "a4");
   }
 }

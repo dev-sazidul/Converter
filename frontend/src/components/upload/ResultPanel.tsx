@@ -43,6 +43,9 @@ export function ResultPanel({
       {result.meta.output_kind === "zip" && (
         <p className="mt-3 text-sm text-ink">Several files were packed into a ZIP archive.</p>
       )}
+      {typeof result.meta.note === "string" && result.meta.note && (
+        <p className="mt-3 text-sm text-ink">{result.meta.note}</p>
+      )}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <a
           href={apiUrl(result.download_url)}

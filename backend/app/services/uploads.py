@@ -21,6 +21,7 @@ from app.errors import (
     TotalTooLargeError,
     UnsupportedTypeError,
 )
+from app.services.convert.formats import prepare_html, prepare_office
 from app.services.jobs import SavedFile
 
 _CONTROL_CHARS = re.compile(r"[\x00-\x1f\x7f]")
@@ -105,8 +106,8 @@ def inspect_pdf(path: Path, max_pages: int, label: str) -> int:
 
 def inspect_image(path: Path, max_pixels: int, label: str) -> tuple[int, int]:
     kind = sniff(path)
-    if kind not in {"jpeg", "png"}:
-        raise UnsupportedTypeError(f"“{label}” needs to be a JPG or PNG image.")
+    if kind != "jpeg":
+        raise UnsupportedTypeError(f"“{label}” needs to be a JPG or JPEG image.")
     Image.MAX_IMAGE_PIXELS = max_pixels
     try:
         with Image.open(path) as image:
@@ -157,6 +158,18 @@ async def collect_files(
             saved.append(SavedFile(target, label, size, pages))
         elif kind == "image":
             inspect_image(target, settings.max_image_pixels, label)
+            saved.append(SavedFile(target, label, size, None))
+        elif kind == "word":
+            target = prepare_office(target, label, {"doc", "docx"})
+            saved.append(SavedFile(target, label, size, None))
+        elif kind == "excel":
+            target = prepare_office(target, label, {"xls", "xlsx"})
+            saved.append(SavedFile(target, label, size, None))
+        elif kind == "powerpoint":
+            target = prepare_office(target, label, {"ppt", "pptx"})
+            saved.append(SavedFile(target, label, size, None))
+        elif kind == "html":
+            target = prepare_html(target, label)
             saved.append(SavedFile(target, label, size, None))
         else:
             raise UnsupportedTypeError()

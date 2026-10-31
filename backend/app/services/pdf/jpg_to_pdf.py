@@ -1,4 +1,4 @@
-"""Place JPG and PNG images onto PDF pages."""
+"""Place JPG images onto PDF pages."""
 
 from pathlib import Path
 

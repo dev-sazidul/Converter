@@ -3,7 +3,7 @@ import { usePageMeta } from "@/components/seo/usePageMeta";
 import { container } from "@/lib/utils";
 
 export function AboutPage() {
-  usePageMeta("About Convarter", "Convarter is a self-hosted PDF tools site for merge, split, compress, rotate, and image conversion.");
+  usePageMeta("About Convarter", "Convarter is a self-hosted PDF tools site for organizing PDFs and converting documents.");
   return (
     <article className={`${container} max-w-3xl py-12`}>
       <p className="text-sm font-semibold text-primary">About</p>
@@ -11,13 +11,13 @@ export function AboutPage() {
       <AdSlot slot="content" className="mt-8" />
       <div className="mt-5 space-y-4 text-sm leading-7 text-muted">
         <p>
-          Convarter is an independent PDF toolkit. The first release covers the jobs people repeat most often: combining files, pulling pages apart, shrinking large documents, rotating pages, and moving between PDF and images.
+          Convarter is an independent PDF toolkit. It combines files, pulls pages apart, shrinks large documents, rotates pages, and converts between PDF, JPG, Word, Excel, PowerPoint, HTML, and PDF/A.
         </p>
         <p>
           The website sends files to an API on the same server. That API checks the file type, enforces size and page limits, does the work, and keeps the result only long enough to download. There are no accounts in this version.
         </p>
         <p>
-          Word, Excel, PowerPoint, HTML, PDF/A, OCR, signatures, and editing are listed so the catalog is easy to scan. They are labeled Coming soon and do not pretend to process a file.
+          OCR, signatures, and editing are listed so the catalog is easy to scan. They are labeled Coming soon and do not pretend to process a file.
         </p>
       </div>
     </article>

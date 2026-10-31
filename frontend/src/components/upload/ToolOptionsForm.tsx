@@ -107,6 +107,83 @@ export function ToolOptionsForm({ tool, options, onChange }: ToolOptionsFormProp
       </div>
     );
   }
+  if (tool.slug === "pdf-to-word" || tool.slug === "pdf-to-excel") {
+    return (
+      <p className="text-sm text-muted">
+        {tool.slug === "pdf-to-word"
+          ? "Text, tables, and images are copied into Word. Columns, headers, and exact positions may change."
+          : "Tables are extracted into separate sheets. A page without a table contributes its selectable text instead. Scanned pages need OCR, which this tool does not do."}
+      </p>
+    );
+  }
+  if (tool.slug === "word-to-pdf" || tool.slug === "excel-to-pdf" || tool.slug === "powerpoint-to-pdf") {
+    return (
+      <p className="text-sm text-muted">
+        The file is converted with LibreOffice. A font that is not installed on the server is substituted, and the page order is kept.
+      </p>
+    );
+  }
+  if (tool.slug === "pdf-to-powerpoint") {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-muted">
+          Editable slides place selectable text on the page. Picture slides keep the original layout, and the result tells you which mode was used. Complex layouts may not match the PDF exactly.
+        </p>
+        <ChoiceRow label="Slide contents">
+          <Choice label="Editable text" hint="Text you can select." selected={options.slideMode === "editable"} onClick={() => onChange({ ...options, slideMode: "editable" })} />
+          <Choice label="Picture of each page" hint="Layout matches. Text is not editable." selected={options.slideMode === "image"} onClick={() => onChange({ ...options, slideMode: "image" })} />
+        </ChoiceRow>
+      </div>
+    );
+  }
+  if (tool.slug === "html-to-pdf") {
+    const page = options.pageSize === "letter" ? "letter" : "a4";
+    return (
+      <div className="space-y-4">
+        <ChoiceRow label="Source">
+          <Choice label="HTML file" selected={options.htmlSource === "file"} onClick={() => onChange({ ...options, htmlSource: "file" })} />
+          <Choice label="Web address" selected={options.htmlSource === "url"} onClick={() => onChange({ ...options, htmlSource: "url" })} />
+        </ChoiceRow>
+        {options.htmlSource === "url" ? (
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="html-url">
+              Public web address
+            </label>
+            <input
+              id="html-url"
+              type="url"
+              inputMode="url"
+              placeholder="https://example.com"
+              value={options.htmlUrl}
+              onChange={(event) => onChange({ ...options, htmlUrl: event.target.value })}
+              className={cn(fieldClass, "mt-2")}
+            />
+            <p className="mt-2 text-sm text-muted">Private, local, and file addresses are blocked. The page is rendered in a browser with a time limit.</p>
+          </div>
+        ) : (
+          <p className="text-sm text-muted">Uploaded HTML is rendered without scripts, and it cannot load other websites or local files.</p>
+        )}
+        <ChoiceRow label="Page size">
+          <Choice label="A4" selected={page === "a4"} onClick={() => onChange({ ...options, pageSize: "a4" })} />
+          <Choice label="Letter" selected={page === "letter"} onClick={() => onChange({ ...options, pageSize: "letter" })} />
+        </ChoiceRow>
+      </div>
+    );
+  }
+  if (tool.slug === "pdf-to-pdfa") {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-muted">
+          The converted file is checked for a PDF/A marker, an output intent, the original page count, and a readable structure. That check is not a full ISO veraPDF certification, and the download is withheld if it fails.
+        </p>
+        <ChoiceRow label="PDF/A level">
+          <Choice label="PDF/A-1b" selected={options.pdfaLevel === "1b"} onClick={() => onChange({ ...options, pdfaLevel: "1b" })} />
+          <Choice label="PDF/A-2b" hint="Recommended" selected={options.pdfaLevel === "2b"} onClick={() => onChange({ ...options, pdfaLevel: "2b" })} />
+          <Choice label="PDF/A-3b" selected={options.pdfaLevel === "3b"} onClick={() => onChange({ ...options, pdfaLevel: "3b" })} />
+        </ChoiceRow>
+      </div>
+    );
+  }
   if (tool.slug === "jpg-to-pdf") {
     return (
       <div className="space-y-4">

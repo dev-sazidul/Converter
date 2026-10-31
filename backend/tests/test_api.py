@@ -24,7 +24,7 @@ def test_health_and_meta(client):
     assert meta.status_code == 200
     body = meta.json()
     assert body["name"] == "Convarter"
-    assert len(body["tools"]) == 6
+    assert len(body["tools"]) == 14
     assert {item["slug"] for item in body["tools"]} == {
         "merge-pdf",
         "split-pdf",
@@ -32,6 +32,14 @@ def test_health_and_meta(client):
         "rotate-pdf",
         "pdf-to-jpg",
         "jpg-to-pdf",
+        "pdf-to-word",
+        "word-to-pdf",
+        "pdf-to-excel",
+        "excel-to-pdf",
+        "pdf-to-powerpoint",
+        "powerpoint-to-pdf",
+        "html-to-pdf",
+        "pdf-to-pdfa",
     }
     assert "/storage" not in meta.text
     assert "Traceback" not in meta.text
@@ -244,7 +252,7 @@ def test_pdf_to_jpg_and_jpg_to_pdf(client):
         data={"page_size": "a4", "orientation": "portrait", "margin": "small"},
         files=_files(
             ("wide.jpg", image_bytes((220, 80), (20, 90, 80)), "image/jpeg"),
-            ("tall.png", image_bytes((80, 220), (180, 40, 40), "png"), "image/png"),
+            ("tall.jpeg", image_bytes((80, 220), (180, 40, 40)), "image/jpeg"),
         ),
     )
     assert built.status_code == 200, built.text
@@ -276,6 +284,14 @@ def test_rejects_unsupported_images_and_encrypted_pdfs(client):
     )
     assert gif.status_code == 400
     assert gif.json()["error"]["code"] in {"unsupported_type", "invalid_image"}
+
+    png = client.post(
+        "/api/v1/tools/jpg-to-pdf",
+        files=_files(("photo.png", image_bytes((40, 40), (10, 20, 30), "png"), "image/png")),
+    )
+    assert png.status_code == 400
+    assert png.json()["error"]["code"] == "unsupported_type"
+    assert "JPG or JPEG" in png.json()["error"]["message"]
 
     locked = client.post(
         "/api/v1/tools/compress",

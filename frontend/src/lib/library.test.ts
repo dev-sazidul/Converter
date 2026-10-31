@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ApiError, toApiError } from "@/lib/api";
 import { defaultLimits } from "@/lib/api";
-import { validateIncomingFiles, validatePageList, validateReady } from "@/lib/files";
+import { isJpegFile, matchesContent, validateHtmlUrl, validateIncomingFiles, validatePageList, validateReady } from "@/lib/files";
 import { availableTools, getTool, tools } from "@/lib/tools";
 import { POPUP_INTERVAL_MS, popupCreatives } from "@/lib/ads";
 import { formatBytes } from "@/lib/utils";
@@ -24,9 +24,21 @@ describe("formatBytes", () => {
 });
 
 describe("tool registry", () => {
-  it("publishes six working tools with endpoints and unique urls", () => {
+  it("publishes the working tools with endpoints and unique urls", () => {
     const ready = availableTools();
-    expect(ready).toHaveLength(6);
+    expect(ready).toHaveLength(14);
+    expect(ready.map((tool) => tool.slug)).toEqual(
+      expect.arrayContaining([
+        "pdf-to-word",
+        "word-to-pdf",
+        "pdf-to-excel",
+        "excel-to-pdf",
+        "pdf-to-powerpoint",
+        "powerpoint-to-pdf",
+        "html-to-pdf",
+        "pdf-to-pdfa",
+      ]),
+    );
     expect(new Set(tools.map((tool) => tool.slug)).size).toBe(tools.length);
     expect(ready.every((tool) => tool.endpoint?.startsWith("/api/v1/tools/"))).toBe(true);
     expect(tools.filter((tool) => tool.status === "soon").every((tool) => !tool.endpoint)).toBe(true);
@@ -47,6 +59,53 @@ describe("file checks", () => {
     const result = validateIncomingFiles([good, text, huge], [], merge, defaultLimits);
     expect(result.accepted).toHaveLength(1);
     expect(result.error).toMatch(/isn't a PDF|larger than/);
+  });
+
+  it("rejects PNG files on JPG to PDF", async () => {
+    const jpgTool = getTool("jpg-to-pdf");
+    if (!jpgTool) throw new Error("missing jpg tool");
+    const jpg = new File([new Uint8Array([0xff, 0xd8, 0xff])], "photo.jpg", { type: "image/jpeg" });
+    const jpeg = new File([new Uint8Array([0xff, 0xd8, 0xff])], "scan.JPEG", { type: "" });
+    const png = new File([new Uint8Array([0x89, 0x50])], "diagram.png", { type: "image/png" });
+    const result = validateIncomingFiles([jpg, jpeg, png], [], jpgTool, defaultLimits);
+    expect(result.accepted.map((file) => file.name)).toEqual(["photo.jpg", "scan.JPEG"]);
+    expect(result.error).toBe("“diagram.png” isn't a JPG or JPEG file. Only .jpg and .jpeg images can be added.");
+    const renamed = new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], "photo.jpg", { type: "image/jpeg" });
+    expect(await isJpegFile(jpg)).toBe(true);
+    expect(await isJpegFile(renamed)).toBe(false);
+  });
+
+  it("rejects the wrong document type for Word, Excel, PowerPoint, and HTML", async () => {
+    const word = getTool("word-to-pdf");
+    const excel = getTool("excel-to-pdf");
+    const slides = getTool("powerpoint-to-pdf");
+    const html = getTool("html-to-pdf");
+    const pdfa = getTool("pdf-to-pdfa");
+    if (!word || !excel || !slides || !html || !pdfa) throw new Error("missing conversion tool");
+    const png = new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], "diagram.png", { type: "image/png" });
+    const renamed = new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0, 0, 0, 0])], "notes.docx", { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    const docx = new File([new Uint8Array([0x50, 0x4b, 0x03, 0x04])], "notes.docx", { type: "" });
+    const rejected = validateIncomingFiles([png, renamed], [], word, defaultLimits);
+    expect(rejected.accepted.map((file) => file.name)).toEqual(["notes.docx"]);
+    expect(rejected.error).toMatch(/Word file/);
+    expect(await matchesContent(docx, "word-to-pdf")).toBe(true);
+    expect(await matchesContent(renamed, "word-to-pdf")).toBe(false);
+    const sheet = new File([new Uint8Array([0x50, 0x4b, 0x03, 0x04])], "book.xlsx", { type: "" });
+    expect((await validateIncomingFiles([sheet], [], excel, defaultLimits)).accepted).toHaveLength(1);
+    const deck = new File([new Uint8Array([0xd0, 0xcf, 0x11, 0xe0])], "deck.ppt", { type: "" });
+    expect(await matchesContent(deck, "powerpoint-to-pdf")).toBe(true);
+    const page = new File(["<p>Hello</p>"], "page.html", { type: "text/html" });
+    const fakeHtml = new File([new Uint8Array([0x25, 0x50, 0x44, 0x46])], "page.html", { type: "text/html" });
+    const htmlResult = validateIncomingFiles([page, png], [], html, defaultLimits);
+    expect(htmlResult.accepted.map((file) => file.name)).toEqual(["page.html"]);
+    expect(htmlResult.error).toMatch(/HTML file/);
+    expect(await matchesContent(page, "html-to-pdf")).toBe(true);
+    expect(await matchesContent(fakeHtml, "html-to-pdf")).toBe(false);
+    const notPdf = new File(["hello"], "notes.pdf", { type: "application/pdf" });
+    expect(await matchesContent(notPdf, "pdf-to-pdfa")).toBe(false);
+    expect(validateHtmlUrl("http://127.0.0.1/secret")).toMatch(/isn't allowed/);
+    expect(validateHtmlUrl("file:///etc/passwd")).toMatch(/http and https/);
+    expect(validateHtmlUrl("https://example.com/docs")).toBeNull();
   });
 
   it("requires two files before merge", () => {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { MoreMenu } from "@/components/layout/MoreMenu";
 import { ConvertSection } from "@/components/tools/ConvertSection";
 import { Logo } from "@/components/ui/Logo";
 import { availableTools, tools } from "@/lib/tools";
@@ -17,19 +18,24 @@ export function Header() {
   const location = useLocation();
   const onConvertPage = location.pathname === "/convert-pdf";
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const convertRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
   const featured = tools.filter((tool) => tool.featured && tool.status === "available");
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setConvertOpen(false);
+        setMoreOpen(false);
         setMobileOpen(false);
       }
     }
     function onPointer(event: MouseEvent) {
       if (!convertRef.current?.contains(event.target as Node)) setConvertOpen(false);
+      if (!moreRef.current?.contains(event.target as Node)) setMoreOpen(false);
     }
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onPointer);
@@ -41,7 +47,9 @@ export function Header() {
 
   useEffect(() => {
     setConvertOpen(false);
+    setMoreOpen(false);
     setMobileOpen(false);
+    setMobileMoreOpen(false);
   }, [location.pathname]);
 
   return (
@@ -68,7 +76,10 @@ export function Header() {
               aria-expanded={convertOpen}
               aria-haspopup="true"
               aria-controls="convert-pdf-menu"
-              onClick={() => setConvertOpen((open) => !open)}
+              onClick={() => {
+                setMoreOpen(false);
+                setConvertOpen((open) => !open);
+              }}
             >
               Convert PDF
               <ChevronDown className={cn("h-4 w-4 transition-transform", convertOpen && "rotate-180")} aria-hidden="true" />
@@ -91,14 +102,57 @@ export function Header() {
             )}
           </div>
         </nav>
-        <div className="ml-auto hidden items-center gap-2 sm:flex">
+        <div className="ml-auto hidden items-center gap-1 sm:flex">
           <Link to="/help" className={cn("rounded-lg px-3 py-2 text-sm font-medium text-ink/80 hover:bg-primary-soft", focusRing)}>
             Help
           </Link>
+          <button type="button" className={cn("rounded-lg px-3 py-2 text-sm font-medium text-ink/80 hover:bg-primary-soft", focusRing)}>
+            Login
+          </button>
+          <button
+            type="button"
+            className={cn("rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark", focusRing)}
+          >
+            Sign up
+          </button>
+          <div className="relative" ref={moreRef}>
+            <button
+              type="button"
+              className={cn(
+                "inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-primary-soft",
+                focusRing,
+                moreOpen ? "text-primary" : "text-ink",
+              )}
+              aria-expanded={moreOpen}
+              aria-haspopup="true"
+              aria-controls="more-menu"
+              aria-label="More"
+              title="More"
+              onClick={() => {
+                setConvertOpen(false);
+                setMoreOpen((open) => !open);
+              }}
+            >
+              <span className="grid grid-cols-3 gap-[3px]" aria-hidden="true">
+                {Array.from({ length: 9 }, (_, index) => (
+                  <span key={index} className="h-[3.5px] w-[3.5px] rounded-full bg-current" />
+                ))}
+              </span>
+            </button>
+            {moreOpen && (
+              <div
+                id="more-menu"
+                className="z-40 max-h-[min(32rem,calc(100vh-5.5rem))] overflow-y-auto rounded-2xl border border-line bg-white p-6 shadow-card max-lg:fixed max-lg:inset-x-4 max-lg:top-16 lg:absolute lg:right-0 lg:top-12 lg:w-[min(52rem,calc(100vw-3rem))]"
+                role="menu"
+              >
+                <MoreMenu onNavigate={() => setMoreOpen(false)} />
+              </div>
+            )}
+          </div>
         </div>
         <button
           type="button"
-          className={cn("ml-auto inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line lg:hidden", focusRing)}
+          className={cn("ml-auto inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line sm:ml-0 lg:hidden", focusRing)}
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav"
           onClick={() => setMobileOpen((open) => !open)}
@@ -124,6 +178,25 @@ export function Header() {
             <NavLink to="/help" className={linkClass} onClick={() => setMobileOpen(false)}>
               Help
             </NavLink>
+            <button
+              type="button"
+              className={cn("rounded-lg px-3 py-2 text-left text-sm font-medium text-ink/80 hover:bg-primary-soft", focusRing)}
+              aria-expanded={mobileMoreOpen}
+              onClick={() => setMobileMoreOpen((open) => !open)}
+            >
+              More
+            </button>
+            {mobileMoreOpen && (
+              <div className="rounded-2xl border border-line p-4">
+                <MoreMenu onNavigate={() => setMobileOpen(false)} />
+              </div>
+            )}
+            <button type="button" className={cn("rounded-lg px-3 py-2 text-left text-sm font-medium text-ink/80 hover:bg-primary-soft", focusRing)}>
+              Login
+            </button>
+            <button type="button" className={cn("w-fit rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark", focusRing)}>
+              Sign up
+            </button>
           </div>
         </nav>
       )}

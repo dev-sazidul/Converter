@@ -10,7 +10,13 @@ cd backend
 .venv/bin/pytest
 ```
 
-The suite builds PDFs and images in memory. It covers:
+Word, Excel, and PowerPoint tests need LibreOffice. PDF/A tests need Ghostscript. HTML tests need Chromium:
+
+```bash
+backend/.venv/bin/python -m playwright install chromium
+```
+
+The suite builds PDFs and documents in memory. It covers:
 
 - Merging two PDFs and checking page order
 - Split by ranges, every page, and interval, including ZIP downloads
@@ -19,7 +25,15 @@ The suite builds PDFs and images in memory. It covers:
 - High-quality compression that keeps text readable
 - Rotation of selected pages
 - PDF to JPG for one page and for a ZIP of several pages
-- JPG and PNG to PDF, including A4 page size and image order
+- JPG to PDF, including A4 page size and image order. PNG is rejected.
+- PDF to Word for text, an image, and a multi-page file
+- Word, Excel, and PowerPoint to PDF, including text from each source
+- PDF to Excel tables, a text fallback, and a page with nothing to extract
+- PDF to PowerPoint in editable and picture modes
+- HTML to PDF, including a script and a local file reference that must not appear
+- Public and blocked web addresses for HTML to PDF
+- PDF/A-2b, including the PDF/A marker and a failed check that does not return a file
+- Rejected office uploads, damaged files, and empty uploads
 - Password-protected PDFs
 - File size, total size, page count, and file count limits
 - Download authorization, including ids that are not UUIDs

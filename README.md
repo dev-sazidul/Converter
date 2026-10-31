@@ -1,6 +1,6 @@
 # Convarter
 
-Convarter is a PDF tools site you can run on your own domain. The first release merges, splits, compresses, and rotates PDFs, and converts between PDF and JPG or PNG.
+Convarter is a PDF tools site you can run on your own domain. It merges, splits, compresses, and rotates PDFs, converts between PDF and JPG, and converts Word, Excel, PowerPoint, HTML, and PDF/A.
 
 The interface is original. It is not a copy of another product's brand.
 
@@ -14,6 +14,14 @@ The interface is original. It is not a copy of another product's brand.
 | Rotate PDF | `/rotate-pdf` |
 | PDF to JPG | `/pdf-to-jpg` |
 | JPG to PDF | `/jpg-to-pdf` |
+| PDF to Word | `/pdf-to-word` |
+| Word to PDF | `/word-to-pdf` |
+| PDF to Excel | `/pdf-to-excel` |
+| Excel to PDF | `/excel-to-pdf` |
+| PDF to PowerPoint | `/pdf-to-powerpoint` |
+| PowerPoint to PDF | `/powerpoint-to-pdf` |
+| HTML to PDF | `/html-to-pdf` |
+| PDF to PDF/A | `/pdf-to-pdfa` |
 
 Coming soon cards are visible in the catalog. They do not upload files.
 
@@ -21,7 +29,10 @@ Coming soon cards are visible in the catalog. They do not upload files.
 
 - Python 3.12 or newer (3.14 is fine for local development)
 - Node.js 22 or newer
-- Docker, only if you want the container setup
+- LibreOffice, for Word, Excel, and PowerPoint conversion (`soffice` on your PATH, or LibreOffice.app on macOS)
+- Ghostscript (`gs`), for PDF/A
+- Chromium for Playwright, for HTML to PDF: `backend/.venv/bin/python -m playwright install chromium`
+- Docker, only if you want the container setup. The backend image installs LibreOffice, Ghostscript, and Chromium.
 
 ## Install
 
@@ -78,10 +89,13 @@ New tools are added in `frontend/src/lib/tools.ts` and `backend/app/api/routes/t
 
 - File types are detected from the contents, not only the extension.
 - Each job uses its own temporary directory. Downloads are served only for that job id.
-- Uploaded originals are deleted after a successful result. Results expire after one hour by default, and anything left on disk is removed when the API starts.
-- Limits for size, file count, and pages come from environment variables.
+- Uploaded originals are deleted after a successful result. Finished downloads are kept until they expire, including across an API restart.
+- Limits for size, file count, and pages come from environment variables. Conversions also stop after `CONVERSION_TIMEOUT_SECONDS` (120 by default).
 - Password-protected PDFs are rejected.
-- Office conversion, OCR, editing, signatures, accounts, and payments are not in this release.
+- Word, Excel, and PowerPoint files are converted with LibreOffice. Macros are not run.
+- HTML files are rendered without scripts or network access. A web address must be public http or https. Private and local addresses are blocked.
+- PDF/A is produced with Ghostscript and checked for a PDF/A marker, an output intent, the original page count, and a readable file. That is not a full ISO veraPDF certification.
+- OCR, editing, signatures, accounts, and payments are not in this release.
 
 ## Default limits
 
@@ -89,5 +103,5 @@ New tools are added in `frontend/src/lib/tools.ts` and `backend/app/api/routes/t
 - 100 MB per task
 - 20 files
 - 150 pages
-- JPG and PNG for the image tool
+- JPG and JPEG for JPG to PDF. PNG is not accepted there.
 - Resolutions of 96, 150, and 200 DPI

@@ -1,4 +1,4 @@
-"""HTTP routes for the six PDF tools."""
+"""HTTP routes for the PDF and document tools."""
 
 from __future__ import annotations
 
@@ -11,6 +11,13 @@ from fastapi import APIRouter, File, Form, Request, UploadFile
 from app.config import Settings
 from app.errors import AppError, EmptyUploadError, InvalidOptionError, ProcessingFailedError
 from app.schemas import JobResponse
+from app.services.convert.html_policy import normalize_public_url
+from app.services.convert.html_to_pdf import html_file_to_pdf, html_url_to_pdf
+from app.services.convert.pdf_to_excel import pdf_to_excel
+from app.services.convert.pdf_to_pdfa import pdf_to_pdfa
+from app.services.convert.pdf_to_pptx import pdf_to_pptx
+from app.services.convert.pdf_to_word import pdf_to_word
+from app.services.convert.libreoffice import convert_office_to_pdf
 from app.services.jobs import Job, JobStore, ProcessResult, SavedFile
 from app.services.pdf.compress import compress_pdfs
 from app.services.pdf.jpg_to_pdf import jpg_to_pdf
@@ -31,6 +38,14 @@ TOOL_CATALOG = [
     {"slug": "rotate-pdf", "method": "POST", "path": "/api/v1/tools/rotate"},
     {"slug": "pdf-to-jpg", "method": "POST", "path": "/api/v1/tools/pdf-to-jpg"},
     {"slug": "jpg-to-pdf", "method": "POST", "path": "/api/v1/tools/jpg-to-pdf"},
+    {"slug": "pdf-to-word", "method": "POST", "path": "/api/v1/tools/pdf-to-word"},
+    {"slug": "word-to-pdf", "method": "POST", "path": "/api/v1/tools/word-to-pdf"},
+    {"slug": "pdf-to-excel", "method": "POST", "path": "/api/v1/tools/pdf-to-excel"},
+    {"slug": "excel-to-pdf", "method": "POST", "path": "/api/v1/tools/excel-to-pdf"},
+    {"slug": "pdf-to-powerpoint", "method": "POST", "path": "/api/v1/tools/pdf-to-powerpoint"},
+    {"slug": "powerpoint-to-pdf", "method": "POST", "path": "/api/v1/tools/powerpoint-to-pdf"},
+    {"slug": "html-to-pdf", "method": "POST", "path": "/api/v1/tools/html-to-pdf"},
+    {"slug": "pdf-to-pdfa", "method": "POST", "path": "/api/v1/tools/pdf-to-pdfa"},
 ]
 
 
@@ -282,7 +297,7 @@ async def jpg_to_pdf_tool(
         tool="jpg-to-pdf",
         kind="image",
         min_files=1,
-        min_message="Add at least one JPG or PNG image.",
+        min_message="Add at least one JPG or JPEG image.",
     )
     return await _finish(
         request,
@@ -295,4 +310,193 @@ async def jpg_to_pdf_tool(
             orientation=selected_orientation,
             margin=selected_margin,
         ),
+    )
+
+
+def _one(uploads: list[UploadFile], message: str) -> None:
+    if len(uploads) > 1:
+        raise EmptyUploadError(message)
+
+
+@router.post("/tools/pdf-to-word", response_model=JobResponse)
+async def pdf_to_word_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+) -> JobResponse:
+    uploads = as_uploads(files)
+    _one(uploads, "Convert one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="pdf-to-word",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to convert.",
+    )
+    return await _finish(request, job, saved, lambda: pdf_to_word(saved[0], job.directory))
+
+
+@router.post("/tools/word-to-pdf", response_model=JobResponse)
+async def word_to_pdf_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+) -> JobResponse:
+    uploads = as_uploads(files)
+    _one(uploads, "Convert one Word file at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="word-to-pdf",
+        kind="word",
+        min_files=1,
+        min_message="Add a Word file to convert.",
+    )
+    return await _finish(request, job, saved, lambda: convert_office_to_pdf(saved[0], job.directory))
+
+
+@router.post("/tools/pdf-to-excel", response_model=JobResponse)
+async def pdf_to_excel_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+) -> JobResponse:
+    uploads = as_uploads(files)
+    _one(uploads, "Convert one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="pdf-to-excel",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to convert.",
+    )
+    return await _finish(request, job, saved, lambda: pdf_to_excel(saved[0], job.directory))
+
+
+@router.post("/tools/excel-to-pdf", response_model=JobResponse)
+async def excel_to_pdf_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+) -> JobResponse:
+    uploads = as_uploads(files)
+    _one(uploads, "Convert one Excel file at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="excel-to-pdf",
+        kind="excel",
+        min_files=1,
+        min_message="Add an Excel file to convert.",
+    )
+    return await _finish(request, job, saved, lambda: convert_office_to_pdf(saved[0], job.directory))
+
+
+@router.post("/tools/pdf-to-powerpoint", response_model=JobResponse)
+async def pdf_to_powerpoint_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    mode: str = Form("editable"),
+) -> JobResponse:
+    selected = parse_choice(
+        mode,
+        {"editable", "image"},
+        "Choose editable text or a picture of each page.",
+    )
+    uploads = as_uploads(files)
+    _one(uploads, "Convert one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="pdf-to-powerpoint",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to convert.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        lambda: pdf_to_pptx(saved[0], job.directory, mode=selected),
+    )
+
+
+@router.post("/tools/powerpoint-to-pdf", response_model=JobResponse)
+async def powerpoint_to_pdf_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+) -> JobResponse:
+    uploads = as_uploads(files)
+    _one(uploads, "Convert one PowerPoint file at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="powerpoint-to-pdf",
+        kind="powerpoint",
+        min_files=1,
+        min_message="Add a PowerPoint file to convert.",
+    )
+    return await _finish(request, job, saved, lambda: convert_office_to_pdf(saved[0], job.directory))
+
+
+@router.post("/tools/html-to-pdf", response_model=JobResponse)
+async def html_to_pdf_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    source: str = Form("file"),
+    url: str = Form(""),
+    page_size: str = Form("a4"),
+) -> JobResponse:
+    selected_source = parse_choice(source, {"file", "url"}, "Choose an HTML file or a web address.")
+    selected_size = parse_choice(page_size, {"a4", "letter"}, "Choose A4 or Letter.")
+    uploads = as_uploads(files)
+    if selected_source == "url":
+        if uploads:
+            raise InvalidOptionError("Remove the file, or switch to an HTML file.")
+        target = normalize_public_url(url)
+        store: JobStore = request.app.state.store
+        job = store.create("html-to-pdf")
+        return await _finish(
+            request,
+            job,
+            [],
+            lambda: html_url_to_pdf(target, job.directory, page_size=selected_size),
+        )
+    _one(uploads, "Convert one HTML file at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="html-to-pdf",
+        kind="html",
+        min_files=1,
+        min_message="Add an HTML file to convert.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        lambda: html_file_to_pdf(saved[0], job.directory, page_size=selected_size),
+    )
+
+
+@router.post("/tools/pdf-to-pdfa", response_model=JobResponse)
+async def pdf_to_pdfa_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    level: str = Form("2b"),
+) -> JobResponse:
+    selected = parse_choice(level, {"1b", "2b", "3b"}, "Choose PDF/A-1b, PDF/A-2b, or PDF/A-3b.")
+    uploads = as_uploads(files)
+    _one(uploads, "Convert one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="pdf-to-pdfa",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to convert.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        lambda: pdf_to_pdfa(saved[0], job.directory, level=selected),
     )

@@ -12,6 +12,9 @@ import {
   appendOptions,
   defaultOptions,
   fileCap,
+  matchesContent,
+  needsContentCheck,
+  unsupportedFileMessage,
   validateIncomingFiles,
   validateOptions,
   validateReady,
@@ -34,7 +37,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
   const abortRef = useRef<AbortController | null>(null);
   const maxFiles = fileCap(tool, limits);
 
-  function addFiles(incoming: File[]) {
+  async function addFiles(incoming: File[]) {
     if (phase === "processing") return;
     const { accepted, error: problem } = validateIncomingFiles(
       incoming,
@@ -42,14 +45,24 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
       tool,
       limits,
     );
+    const checked: File[] = [];
+    let contentError: string | null = null;
+    for (const file of accepted) {
+      if (needsContentCheck(tool.slug) && !(await matchesContent(file, tool.slug))) {
+        contentError ??= unsupportedFileMessage(file.name, tool);
+        continue;
+      }
+      checked.push(file);
+    }
     const next = [
       ...items,
-      ...accepted.map((file) => ({ id: crypto.randomUUID(), file })),
+      ...checked.map((file) => ({ id: crypto.randomUUID(), file })),
     ];
     setItems(next);
     setResult(null);
-    if (problem) {
-      setError(problem);
+    const message = problem ?? contentError;
+    if (message) {
+      setError(message);
       setPhase(next.length ? "error" : "idle");
       return;
     }
@@ -80,7 +93,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
 
   async function onProcess() {
     if (submitting.current || !tool.endpoint) return;
-    const fileError = validateReady(items.map((item) => item.file), tool, limits);
+    const fileError = validateReady(items.map((item) => item.file), tool, limits, options);
     const optionError = validateOptions(tool, options);
     const problem = fileError ?? optionError;
     if (problem) {
@@ -95,7 +108,10 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
     const controller = new AbortController();
     abortRef.current = controller;
     const form = new FormData();
-    for (const item of items) form.append("files", item.file, item.file.name);
+    const urlMode = tool.slug === "html-to-pdf" && options.htmlSource === "url";
+    if (!urlMode) {
+      for (const item of items) form.append("files", item.file, item.file.name);
+    }
     appendOptions(form, tool, options);
     try {
       const job = await postForm(tool.endpoint, form, (ratio) => setProgress(ratio >= 1 ? 1 : ratio), controller.signal);
@@ -114,6 +130,21 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
     }
   }
 
+  function changeOptions(next: ToolOptions) {
+    const switchingToUrl = tool.slug === "html-to-pdf" && next.htmlSource === "url";
+    if (switchingToUrl) setItems([]);
+    setOptions(next);
+    if (phase === "processing") return;
+    setError(null);
+    if (switchingToUrl) {
+      setPhase("ready");
+      return;
+    }
+    setPhase(items.length ? (phase === "error" ? "error" : "ready") : "idle");
+  }
+
+  const urlMode = tool.slug === "html-to-pdf" && options.htmlSource === "url";
+  const showAction = items.length > 0 || urlMode;
   const uploading = phase === "processing" && progress !== null && progress < 1;
   const related = availableTools().filter((item) => item.slug !== tool.slug).slice(0, 3);
 
@@ -135,7 +166,13 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
             void onProcess();
           }}
         >
-          {items.length === 0 ? (
+          {tool.slug === "html-to-pdf" && (
+            <div className="rounded-3xl border border-line bg-white p-5 shadow-card">
+              <ToolOptionsForm tool={tool} options={options} onChange={changeOptions} />
+            </div>
+          )}
+
+          {!urlMode && items.length === 0 ? (
             <Dropzone
               accept={tool.accept}
               multiple={tool.multiple}
@@ -143,7 +180,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
               hint={`${tool.dropLabel}. Up to ${limits.max_file_size_mb} MB per file.`}
               onFiles={addFiles}
             />
-          ) : (
+          ) : urlMode ? null : (
             <div className="space-y-4 rounded-3xl border border-line bg-paper/60 p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-sm font-semibold text-ink">
@@ -174,9 +211,9 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
             </div>
           )}
 
-          {items.length > 0 && (
+          {items.length > 0 && tool.slug !== "html-to-pdf" && (
             <div className="rounded-3xl border border-line bg-white p-5 shadow-card">
-              <ToolOptionsForm tool={tool} options={options} onChange={setOptions} />
+              <ToolOptionsForm tool={tool} options={options} onChange={changeOptions} />
             </div>
           )}
 
@@ -215,7 +252,7 @@ export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
             </div>
           )}
 
-          {items.length > 0 && (
+          {showAction && (
             <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={phase === "processing"}>
               {phase === "processing" && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
               {phase === "processing" ? tool.processingLabel : tool.actionLabel}

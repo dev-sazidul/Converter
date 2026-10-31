@@ -89,7 +89,7 @@ sudo docker compose exec backend python -c "import urllib.request; print(urllib.
 
 Images:
 
-- `backend/Dockerfile` installs Python 3.12, PyMuPDF's runtime libraries (`libglib2.0-0`, `libgl1`, `libgomp1`), and runs Uvicorn as uid `10001`.
+- `backend/Dockerfile` installs Python 3.12, PyMuPDF's runtime libraries (`libglib2.0-0`, `libgl1`, `libgomp1`), LibreOffice Writer, Calc, and Impress, Ghostscript, and Playwright's Chromium. It runs Uvicorn as uid `10001`. Chromium is started with `--no-sandbox` because the container already drops new privileges. The image is larger because those converters are included. Set `CONVERSION_TIMEOUT_SECONDS` if a conversion should stop sooner than 120 seconds. `PDFA_ICC_PATH` can point at an sRGB profile; otherwise Ghostscript's own profile is used.
 - `frontend/Dockerfile` builds the Vite app and serves it with Nginx, including `GET /healthz` and `/api/` proxying.
 - `deploy/proxy/Dockerfile` is the public Nginx. It terminates TLS when the certificate files exist and proxies `/api/` to the API with a 120 MB body limit and a 180 second read timeout.
 

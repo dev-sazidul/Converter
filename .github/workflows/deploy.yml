@@ -25,8 +25,18 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install conversion programs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libreoffice-writer libreoffice-calc libreoffice-impress \
+            ghostscript fonts-liberation
+
       - name: Install backend dependencies
         run: pip install -r backend/requirements-dev.txt
+
+      - name: Install Chromium for HTML to PDF
+        run: python -m playwright install --with-deps chromium
 
       - name: Run backend tests
         working-directory: backend

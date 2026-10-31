@@ -64,11 +64,18 @@ class EncryptedPdfError(AppError):
         )
 
 
+class InvalidDocumentError(AppError):
+    code = "invalid_document"
+
+    def __init__(self, message: str | None = None) -> None:
+        super().__init__(message or "This file is damaged or isn't a supported document.")
+
+
 class InvalidImageError(AppError):
     code = "invalid_image"
 
     def __init__(self, message: str | None = None) -> None:
-        super().__init__(message or "Use a JPG or PNG image that isn't damaged.")
+        super().__init__(message or "Use a JPG or JPEG image that isn't damaged.")
 
 
 class TooManyPagesError(AppError):
