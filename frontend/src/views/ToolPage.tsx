@@ -1,23 +1,18 @@
-import { Link, useParams } from "react-router-dom";
+"use client";
+
+import { Link } from "@/components/ui/Link";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { useLimits } from "@/components/limits/LimitsProvider";
-import { usePageMeta } from "@/components/seo/usePageMeta";
 import { ToolIcon } from "@/components/tools/ToolIcon";
 import { ToolWorkspace } from "@/components/upload/ToolWorkspace";
 import { availableTools, getTool, tools } from "@/lib/tools";
 import { container, focusRing } from "@/lib/utils";
-import { NotFoundPage } from "@/pages/NotFoundPage";
 
-export function ToolPage() {
-  const { slug = "" } = useParams();
+export function ToolPage({ slug }: { slug: string }) {
   const tool = getTool(slug);
   const limits = useLimits();
-  usePageMeta(
-    tool?.seoTitle ?? "Page not found — Convarter",
-    tool?.seoDescription ?? "That page doesn't exist on Convarter.",
-  );
 
-  if (!tool) return <NotFoundPage />;
+  if (!tool) return null;
 
   return (
     <div className={`${container} py-10 sm:py-14`}>

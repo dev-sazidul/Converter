@@ -1,12 +1,12 @@
+"use client";
+
 import { AdSlot } from "@/components/ads/AdSlot";
 import { useLimits } from "@/components/limits/LimitsProvider";
-import { usePageMeta } from "@/components/seo/usePageMeta";
 import { container } from "@/lib/utils";
 
 export function PrivacyPage() {
   const limits = useLimits();
   const hours = Math.max(1, Math.round(limits.job_ttl_seconds / 3600));
-  usePageMeta("Privacy — Convarter", "How Convarter handles uploaded documents and temporary files.");
   return (
     <article className={`${container} max-w-3xl py-12`}>
       <p className="text-sm font-semibold text-primary">Privacy</p>

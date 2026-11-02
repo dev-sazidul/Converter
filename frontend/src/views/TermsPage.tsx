@@ -1,9 +1,7 @@
 import { AdSlot } from "@/components/ads/AdSlot";
-import { usePageMeta } from "@/components/seo/usePageMeta";
 import { container } from "@/lib/utils";
 
 export function TermsPage() {
-  usePageMeta("Terms — Convarter", "Terms for using Convarter's PDF tools.");
   return (
     <article className={`${container} max-w-3xl py-12`}>
       <p className="text-sm font-semibold text-primary">Terms</p>

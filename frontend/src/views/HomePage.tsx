@@ -1,15 +1,9 @@
 import { CheckCircle2, Clock3, ShieldCheck } from "lucide-react";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { ToolBrowser } from "@/components/tools/ToolBrowser";
-import { usePageMeta } from "@/components/seo/usePageMeta";
 import { container } from "@/lib/utils";
 
 export function HomePage() {
-  usePageMeta(
-    "Home — Convarter",
-    "Merge, split, compress, rotate, and convert PDFs in your browser. Files are processed for the task and then deleted.",
-  );
-
   return (
     <div>
       <section className="hero-wash pb-4 pt-14 sm:pt-20">

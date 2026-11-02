@@ -1,11 +1,11 @@
+"use client";
+
 import { AdSlot } from "@/components/ads/AdSlot";
 import { useLimits } from "@/components/limits/LimitsProvider";
-import { usePageMeta } from "@/components/seo/usePageMeta";
 import { container } from "@/lib/utils";
 
 export function HelpPage() {
   const limits = useLimits();
-  usePageMeta("Help — Convarter", "How Convarter processes PDFs, file limits, and answers to common questions.");
   const hours = Math.max(1, Math.round(limits.job_ttl_seconds / 3600));
   return (
     <article className={`${container} max-w-3xl py-12`}>

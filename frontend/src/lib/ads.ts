@@ -3,15 +3,15 @@ export const POPUP_INTERVAL_MS = 20_000;
 export type AdSlotId = "header" | "home" | "content" | "tool" | "footer";
 
 const slotEnv: Record<AdSlotId, string | undefined> = {
-  header: import.meta.env.VITE_ADSENSE_SLOT_HEADER,
-  home: import.meta.env.VITE_ADSENSE_SLOT_HOME,
-  content: import.meta.env.VITE_ADSENSE_SLOT_CONTENT,
-  tool: import.meta.env.VITE_ADSENSE_SLOT_TOOL,
-  footer: import.meta.env.VITE_ADSENSE_SLOT_FOOTER,
+  header: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER,
+  home: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME,
+  content: process.env.NEXT_PUBLIC_ADSENSE_SLOT_CONTENT,
+  tool: process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOOL,
+  footer: process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER,
 };
 
 export function adsenseClient(): string {
-  return (import.meta.env.VITE_ADSENSE_CLIENT ?? "").trim();
+  return (process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "").trim();
 }
 
 export function adsenseSlotId(slot: AdSlotId): string {

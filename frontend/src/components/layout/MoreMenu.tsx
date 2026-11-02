@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/ui/Link";
 import { ToolIcon } from "@/components/tools/ToolIcon";
 import { toolsByCategory } from "@/lib/tools";
 import { cn, focusRing } from "@/lib/utils";

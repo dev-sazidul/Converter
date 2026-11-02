@@ -1,14 +1,8 @@
 import { AdSlot } from "@/components/ads/AdSlot";
 import { ConvertSection } from "@/components/tools/ConvertSection";
-import { usePageMeta } from "@/components/seo/usePageMeta";
 import { container } from "@/lib/utils";
 
 export function ConvertPdfPage() {
-  usePageMeta(
-    "Convert PDF — Convarter",
-    "Convert documents, HTML, and images to PDF, or save a PDF as Word, Excel, PowerPoint, JPG, or PDF/A.",
-  );
-
   return (
     <div className={`${container} py-10 sm:py-14`}>
       <div className="mx-auto max-w-3xl">

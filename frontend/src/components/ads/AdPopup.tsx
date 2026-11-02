@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { POPUP_INTERVAL_MS, popupCreatives } from "@/lib/ads";

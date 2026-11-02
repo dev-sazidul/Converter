@@ -4,7 +4,7 @@ Interactive docs are served by the backend at `/api/docs` when it is running. Th
 
 Base URL in local development: `http://127.0.0.1:8000`
 
-The browser app calls the same paths. In development, the NestJS server proxies `/api` to the backend. In Docker, Nginx does the same, so the public site uses a relative `/api` path.
+The browser app calls the same paths. In development, Next.js proxies `/api` to the backend. In Docker, Nginx does the same, so the public site uses a relative `/api` path.
 
 ## Health and limits
 

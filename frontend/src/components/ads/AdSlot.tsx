@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 import { adsenseClient, adsenseSlotId, slotPlaceholders, type AdSlotId } from "@/lib/ads";
 import { cn } from "@/lib/utils";

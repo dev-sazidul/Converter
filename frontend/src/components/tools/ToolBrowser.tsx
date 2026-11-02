@@ -1,5 +1,7 @@
+"use client";
+
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/ui/Link";
 import { Search } from "lucide-react";
 import { ToolIcon } from "@/components/tools/ToolIcon";
 import { categories, tools, type CategoryId } from "@/lib/tools";

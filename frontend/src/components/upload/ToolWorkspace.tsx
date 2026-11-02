@@ -1,6 +1,8 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/ui/Link";
 import { useLimits } from "@/components/limits/LimitsProvider";
 import { Dropzone } from "@/components/upload/Dropzone";
 import { FileQueue, type QueueItem } from "@/components/upload/FileQueue";

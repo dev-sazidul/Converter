@@ -4,44 +4,32 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development tsx --tsconfig server/tsconfig.json server/main.ts",
-    "build": "tsc -p tsconfig.json --noEmit && vite build --outDir dist/client && vite build --ssr src/entry-server.tsx --outDir dist/server && tsc -p server/tsconfig.json",
-    "start": "NODE_ENV=production node dist/nest/main.js",
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
     "preview": "npm run build && npm run start",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p server/tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@fontsource/plus-jakarta-sans": "^5.1.0",
-    "@nestjs/common": "^12.3.2",
-    "@nestjs/core": "^12.3.2",
-    "@nestjs/platform-express": "^12.3.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "compression": "^1.8.2",
-    "http-proxy-middleware": "^4.2.1",
     "lucide-react": ">=0.469.0 <1.0.0",
+    "next": "^15.5.28",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.0",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
-    "@types/compression": "^1.8.1",
-    "@types/express": "^5.0.6",
     "@types/node": "^26.6.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "jsdom": "^26.0.0",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
-    "tsx": "^4.23.15",
     "typescript": "^5.7.2",
-    "vite": "^6.2.0",
+    "vite": "^7.3.7",
     "vitest": "^3.0.0"
   }
 }

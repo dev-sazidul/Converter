@@ -1,6 +1,9 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { usePathname } from "next/navigation";
+import { Link, NavLink } from "@/components/ui/Link";
 import { MoreMenu } from "@/components/layout/MoreMenu";
 import { ConvertSection } from "@/components/tools/ConvertSection";
 import { Logo } from "@/components/ui/Logo";
@@ -15,8 +18,8 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   );
 
 export function Header() {
-  const location = useLocation();
-  const onConvertPage = location.pathname === "/convert-pdf";
+  const pathname = usePathname();
+  const onConvertPage = pathname === "/convert-pdf";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
@@ -50,7 +53,7 @@ export function Header() {
     setMoreOpen(false);
     setMobileOpen(false);
     setMobileMoreOpen(false);
-  }, [location.pathname]);
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-30 border-b border-line/80 bg-white/90 backdrop-blur">

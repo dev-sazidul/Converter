@@ -1,24 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { render, publicPaths } from "@/entry-server";
-import { buildHeadTags, statusForPath } from "@/lib/seo";
+import { buildHeadTags, publicPaths, statusForPath } from "@/lib/seo";
 
-describe("server render", () => {
-  it("renders the home page with a title, description, and canonical URL", () => {
-    const page = render("/", "https://convarter.example");
-    expect(page.status).toBe(200);
-    expect(page.html).toContain("Every PDF task, clearly done.");
-    expect(page.head).toContain("<title>Home — Convarter</title>");
-    expect(page.head).toContain('rel="canonical" href="https://convarter.example/"');
-    expect(page.head).toContain("og:description");
-    expect(page.head).toContain("WebSite");
+describe("page metadata", () => {
+  it("includes a title, description, canonical URL, and structured data", () => {
+    const head = buildHeadTags(
+      {
+        title: "Home — Convarter",
+        description: "Merge, split, compress, rotate, and convert PDFs in your browser. Files are processed for the task and then deleted.",
+        path: "/",
+      },
+      "https://convarter.example",
+    );
+    expect(head).toContain("<title>Home — Convarter</title>");
+    expect(head).toContain('rel="canonical" href="https://convarter.example/"');
+    expect(head).toContain("og:description");
+    expect(head).toContain("WebSite");
   });
 
-  it("renders a tool page and rejects an unknown address", () => {
-    const tool = render("/merge-pdf", "https://convarter.example");
-    expect(tool.status).toBe(200);
-    expect(tool.html).toContain("Merge PDF");
-    expect(tool.head).toContain("WebApplication");
-    expect(render("/not-a-tool", "https://convarter.example").status).toBe(404);
+  it("marks tool pages and unknown addresses", () => {
+    const tool = buildHeadTags(
+      { title: "Merge PDF online — Convarter", description: "Combine PDFs.", path: "/merge-pdf" },
+      "https://convarter.example",
+    );
+    expect(tool).toContain("WebApplication");
+    expect(statusForPath("/merge-pdf")).toBe(200);
+    expect(statusForPath("/not-a-tool")).toBe(404);
     expect(statusForPath("/help")).toBe(200);
   });
 
@@ -29,9 +35,7 @@ describe("server render", () => {
     expect(paths).toContain("/pdf-to-pdfa");
     expect(paths).toContain("/sign-pdf");
   });
-});
 
-describe("head tags", () => {
   it("escapes characters in titles", () => {
     const head = buildHeadTags(
       { title: `Tom & "Jerry"`, description: "A <description>", path: "/help" },

@@ -34,7 +34,7 @@ function absolute(origin: string, path: string): string {
   return `${origin.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-function structuredData(head: PageHead, origin: string): unknown {
+export function structuredData(head: PageHead, origin: string): unknown {
   const url = absolute(origin, head.path);
   const slug = head.path.startsWith("/") ? head.path.slice(1) : "";
   const tool = slug ? getTool(slug) : undefined;
@@ -101,46 +101,4 @@ export function buildHeadTags(head: PageHead, origin: string): string {
     `<meta name="twitter:description" content="${escapeHtml(head.description)}" />`,
     `<script type="application/ld+json" id="structured-data">${json}</script>`,
   ].join("\n    ");
-}
-
-function upsertMeta(attribute: "name" | "property", key: string, content: string) {
-  let element = document.head.querySelector(`meta[${attribute}="${key}"]`);
-  if (!element) {
-    element = document.createElement("meta");
-    element.setAttribute(attribute, key);
-    document.head.appendChild(element);
-  }
-  element.setAttribute("content", content);
-}
-
-export function applyClientHead(head: PageHead) {
-  const origin = window.location.origin;
-  document.title = head.title;
-  const holder = document.createElement("div");
-  holder.innerHTML = buildHeadTags(head, origin);
-  holder.querySelectorAll("meta").forEach((meta) => {
-    const name = meta.getAttribute("name");
-    const property = meta.getAttribute("property");
-    if (name) upsertMeta("name", name, meta.getAttribute("content") ?? "");
-    if (property) upsertMeta("property", property, meta.getAttribute("content") ?? "");
-  });
-  const canonical = holder.querySelector("link[rel='canonical']");
-  if (canonical) {
-    let link = document.head.querySelector("link[rel='canonical']");
-    if (!link) {
-      link = document.createElement("link");
-      link.setAttribute("rel", "canonical");
-      document.head.appendChild(link);
-    }
-    link.setAttribute("href", canonical.getAttribute("href") ?? "");
-  }
-  const json = holder.querySelector("#structured-data");
-  let script = document.getElementById("structured-data");
-  if (!script) {
-    script = document.createElement("script");
-    script.id = "structured-data";
-    script.setAttribute("type", "application/ld+json");
-    document.head.appendChild(script);
-  }
-  script.textContent = json?.textContent ?? "";
 }

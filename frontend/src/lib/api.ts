@@ -30,7 +30,7 @@ export const defaultLimits: Limits = {
   job_ttl_seconds: 3600,
 };
 
-const rawBase = import.meta.env.VITE_API_URL ?? "";
+const rawBase = process.env.NEXT_PUBLIC_API_URL ?? "";
 export const API_BASE = rawBase.replace(/\/$/, "");
 
 export function apiUrl(path: string): string {

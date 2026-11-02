@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/ui/Link";
 import { focusRing } from "@/lib/utils";
 
 export function Logo({ className = "" }: { className?: string }) {

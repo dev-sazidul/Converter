@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { defaultLimits, getMeta, type Limits } from "@/lib/api";
 

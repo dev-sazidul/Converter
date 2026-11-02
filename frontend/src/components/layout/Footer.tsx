@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "@/components/ui/Link";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { availableTools } from "@/lib/tools";
 import { container, focusRing } from "@/lib/utils";
