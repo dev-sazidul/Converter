@@ -54,7 +54,7 @@ make backend
 make frontend
 ```
 
-Open http://localhost:5173. The Vite server proxies `/api` to http://127.0.0.1:8000. API docs are at http://127.0.0.1:8000/api/docs.
+Open http://127.0.0.1:3000. The NestJS server renders each page on the server and proxies `/api` to http://127.0.0.1:8000. API docs are at http://127.0.0.1:8000/api/docs.
 
 You do not need a `.env` file for local development. Copy `.env.example` to `.env` when you want to change limits or CORS.
 
@@ -77,7 +77,7 @@ The site is published on port 8080 and the API on `127.0.0.1:8000`. Put Caddy or
 ## Layout
 
 ```text
-frontend/     React, TypeScript, Vite, Tailwind
+frontend/     React interface, rendered by the NestJS server in frontend/server
 backend/app   FastAPI routes, validation, and PDF services
 backend/tests API and processing tests
 docs/         API, testing, and deployment notes

@@ -56,17 +56,27 @@ services:
         VITE_ADSENSE_SLOT_TOOL: ${VITE_ADSENSE_SLOT_TOOL:-}
         VITE_ADSENSE_SLOT_FOOTER: ${VITE_ADSENSE_SLOT_FOOTER:-}
     image: convarter-frontend:${IMAGE_TAG:-local}
+    environment:
+      PORT: 3000
+      API_PROXY_TARGET: http://backend:8000
+      NODE_ENV: production
     expose:
-      - "80"
+      - "3000"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/healthz"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     restart: unless-stopped
     init: true
     security_opt:

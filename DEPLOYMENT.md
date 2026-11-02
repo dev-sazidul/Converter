@@ -178,7 +178,7 @@ Finished jobs are stored with a `job.json` file beside the PDF. Replacing the AP
 
 **The site loads and `/api` returns 502.** The API container is unhealthy. Read `sudo docker compose logs --tail=100 backend`. A missing shared library for PyMuPDF shows up there. The backend image already installs `libglib2.0-0`, `libgl1`, and `libgomp1`.
 
-**Uploads fail at the proxy.** Nginx allows 120 MB. The application still enforces `MAX_FILE_SIZE_MB` and `MAX_TOTAL_SIZE_MB` from `.env`. Raise both together if you change the product limit, including `client_max_body_size` in `frontend/nginx.conf` and `deploy/proxy/https.conf.template`.
+**Uploads fail at the proxy.** Nginx allows 120 MB. The application still enforces `MAX_FILE_SIZE_MB` and `MAX_TOTAL_SIZE_MB` from `.env`. Raise both together if you change the product limit, including `client_max_body_size` in `deploy/proxy/https.conf.template`.
 
 **Certificate request fails.** DNS must already point at this VM, ports 80 must be open in both the security list and iptables, and the proxy must be running so `/.well-known/acme-challenge/` is served. Then rerun `sudo /opt/convarter/app/deploy/issue-cert.sh`.
 

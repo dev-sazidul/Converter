@@ -20,13 +20,17 @@ ENV VITE_API_URL=$VITE_API_URL \
     VITE_ADSENSE_SLOT_FOOTER=$VITE_ADSENSE_SLOT_FOOTER
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM node:22-alpine
 
-RUN apk add --no-cache wget
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=3000
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY --from=build /app/dist ./dist
+EXPOSE 3000
 
-EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD node -e "fetch('http://127.0.0.1:3000/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -q -O /dev/null http://127.0.0.1/healthz
+CMD ["node", "dist/nest/main.js"]

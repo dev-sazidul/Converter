@@ -66,7 +66,7 @@ export function Dropzone({
         take(event.dataTransfer.files);
       }}
       className={cn(
-        "rounded-3xl border border-dashed px-6 py-14 text-center transition",
+        "rounded-3xl border border-dashed px-4 py-10 text-center transition sm:px-6 sm:py-14",
         hot ? "border-primary bg-primary-soft" : "border-line bg-white",
       )}
     >
@@ -87,7 +87,7 @@ export function Dropzone({
         disabled={disabled}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          "inline-flex h-12 items-center justify-center rounded-xl bg-primary px-6 text-base font-semibold text-white shadow-sm hover:bg-primary-dark disabled:opacity-60",
+          "inline-flex h-12 max-w-full items-center justify-center rounded-xl bg-primary px-4 text-base font-semibold text-white shadow-sm hover:bg-primary-dark disabled:opacity-60 sm:px-6",
           focusRing,
         )}
       >

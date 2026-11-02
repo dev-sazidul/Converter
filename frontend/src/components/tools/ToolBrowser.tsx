@@ -85,7 +85,7 @@ export function ToolBrowser({ embedded = false }: { embedded?: boolean }) {
         ) : (
           <ul className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {visible.map((tool) => (
-              <li key={tool.slug}>
+              <li key={tool.slug} className="min-w-0">
                 <Link
                   to={`/${tool.slug}`}
                   className={cn(

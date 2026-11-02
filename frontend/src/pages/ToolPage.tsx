@@ -32,7 +32,7 @@ export function ToolPage() {
             <ToolIcon name={tool.icon} />
           </span>
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{tool.name}</h1>
+            <h1 className="break-words text-3xl font-semibold tracking-tight text-ink sm:text-4xl">{tool.name}</h1>
             <p className="mt-2 text-base leading-7 text-muted">{tool.summary}</p>
             {tool.status === "available" && (
               <p className="mt-2 text-sm text-muted">

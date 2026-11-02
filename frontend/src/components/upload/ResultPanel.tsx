@@ -30,7 +30,7 @@ export function ResultPanel({
       <h2 id="result-title" ref={headingRef} tabIndex={-1} className="mt-4 text-2xl font-semibold tracking-tight text-ink">
         Your file is ready
       </h2>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 break-words text-sm text-muted">
         {result.filename} · {formatBytes(result.size_bytes)}
       </p>
       {tool.slug === "compress-pdf" && (

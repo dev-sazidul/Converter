@@ -1,20 +1,16 @@
-import { useEffect } from "react";
+import { createContext, useContext, useEffect, type MutableRefObject } from "react";
+import { useLocation } from "react-router-dom";
+import { applyClientHead, normalizePath, type PageHead } from "@/lib/seo";
+
+export const HeadContext = createContext<MutableRefObject<PageHead | null> | null>(null);
 
 export function usePageMeta(title: string, description: string) {
-  useEffect(() => {
-    document.title = title;
-    setMeta("name", "description", description);
-    setMeta("property", "og:title", title);
-    setMeta("property", "og:description", description);
-  }, [title, description]);
-}
+  const location = useLocation();
+  const head = useContext(HeadContext);
+  const path = normalizePath(location.pathname);
+  if (head) head.current = { title, description, path };
 
-function setMeta(attribute: "name" | "property", key: string, content: string) {
-  let element = document.head.querySelector(`meta[${attribute}="${key}"]`);
-  if (!element) {
-    element = document.createElement("meta");
-    element.setAttribute(attribute, key);
-    document.head.appendChild(element);
-  }
-  element.setAttribute("content", content);
+  useEffect(() => {
+    applyClientHead({ title, description, path });
+  }, [title, description, path]);
 }

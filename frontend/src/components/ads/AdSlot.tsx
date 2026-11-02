@@ -57,7 +57,13 @@ export function AdSlot({
             data-full-width-responsive="true"
           />
         ) : (
-          <img src={slotPlaceholders[slot]} alt="Demo advertisement" className="h-auto w-full" />
+          <img
+            src={slotPlaceholders[slot]}
+            alt="Demo advertisement"
+            className="h-auto w-full"
+            decoding="async"
+            loading={slot === "header" ? "eager" : "lazy"}
+          />
         )}
       </div>
     </aside>
