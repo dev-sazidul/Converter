@@ -110,6 +110,14 @@ class ProcessingFailedError(AppError):
         )
 
 
+class BusyError(AppError):
+    code = "busy"
+    status_code = 503
+
+    def __init__(self, message: str | None = None) -> None:
+        super().__init__(message or "The converter is busy right now. Try again in a minute.")
+
+
 class NotFoundError(AppError):
     code = "not_found"
     status_code = 404

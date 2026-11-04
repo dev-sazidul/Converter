@@ -12,6 +12,7 @@ from PIL import Image
 from app.errors import AppError, ProcessingFailedError
 from app.services.jobs import ProcessResult, SavedFile
 from app.services.pdf.packaging import finalize_outputs, stem_name
+from app.services.pdf.render import page_pixmap
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +169,7 @@ def _rasterize(source: Path, destination: Path, dpi: int, quality: int) -> bool:
         output = pymupdf.open()
         try:
             for page in source_doc:
-                pixmap = page.get_pixmap(dpi=dpi, alpha=False, colorspace=pymupdf.csRGB)
+                pixmap, _reduced = page_pixmap(page, dpi)
                 payload = _jpeg_bytes(pixmap, quality)
                 new_page = output.new_page(width=page.rect.width, height=page.rect.height)
                 new_page.insert_image(new_page.rect, stream=payload)

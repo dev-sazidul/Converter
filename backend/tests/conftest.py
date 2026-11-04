@@ -20,7 +20,6 @@ def make_client(tmp_path, monkeypatch):
             "MAX_PAGES": "12",
             "JOB_TTL_SECONDS": "3600",
             "CLEANUP_INTERVAL_SECONDS": "3600",
-            "CORS_ORIGINS": "http://localhost:5173",
             "ENVIRONMENT": "test",
         }
         env.update({key: str(value) for key, value in overrides.items()})

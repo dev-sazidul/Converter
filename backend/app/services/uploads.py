@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 from pathlib import Path
 
@@ -25,6 +26,11 @@ from app.services.convert.formats import prepare_html, prepare_office
 from app.services.jobs import SavedFile
 
 _CONTROL_CHARS = re.compile(r"[\x00-\x1f\x7f]")
+_OFFICE_KINDS = {
+    "word": {"doc", "docx"},
+    "excel": {"xls", "xlsx"},
+    "powerpoint": {"ppt", "pptx"},
+}
 
 
 def safe_display_name(name: str | None, fallback: str) -> str:
@@ -153,23 +159,18 @@ async def collect_files(
             raise TotalTooLargeError(
                 f"Those files add up to more than {settings.max_total_size_mb} MB. Remove one and try again."
             )
+        # Opening a document can take a while, so it runs off the event loop.
         if kind == "pdf":
-            pages = inspect_pdf(target, settings.max_pages, label)
+            pages = await asyncio.to_thread(inspect_pdf, target, settings.max_pages, label)
             saved.append(SavedFile(target, label, size, pages))
         elif kind == "image":
-            inspect_image(target, settings.max_image_pixels, label)
+            await asyncio.to_thread(inspect_image, target, settings.max_image_pixels, label)
             saved.append(SavedFile(target, label, size, None))
-        elif kind == "word":
-            target = prepare_office(target, label, {"doc", "docx"})
-            saved.append(SavedFile(target, label, size, None))
-        elif kind == "excel":
-            target = prepare_office(target, label, {"xls", "xlsx"})
-            saved.append(SavedFile(target, label, size, None))
-        elif kind == "powerpoint":
-            target = prepare_office(target, label, {"ppt", "pptx"})
+        elif kind in _OFFICE_KINDS:
+            target = await asyncio.to_thread(prepare_office, target, label, _OFFICE_KINDS[kind])
             saved.append(SavedFile(target, label, size, None))
         elif kind == "html":
-            target = prepare_html(target, label)
+            target = await asyncio.to_thread(prepare_html, target, label)
             saved.append(SavedFile(target, label, size, None))
         else:
             raise UnsupportedTypeError()

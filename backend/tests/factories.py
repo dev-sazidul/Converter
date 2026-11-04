@@ -61,3 +61,34 @@ def heavy_image_pdf_bytes() -> bytes:
 
 def write_file(path: Path, payload: bytes) -> None:
     path.write_bytes(payload)
+
+
+def huge_page_pdf_bytes(points: float = 14_400) -> bytes:
+    """A one-page PDF whose page is 200 inches square, the largest size the PDF spec allows."""
+    document = pymupdf.open()
+    page = document.new_page(width=points, height=points)
+    page.insert_text((72, 120), "HUGE PAGE", fontsize=72)
+    buffer = BytesIO()
+    document.save(buffer)
+    document.close()
+    return buffer.getvalue()
+
+
+# Stand-ins for tool functions. The job worker runs tools in a child process, which
+# imports them by module path, so they must live at module level.
+
+
+def explode_with_secret(**_kwargs) -> None:
+    raise RuntimeError("secret-token-do-not-leak /tmp/private")
+
+
+def sleep_forever(**_kwargs) -> None:
+    import time
+
+    time.sleep(120)
+
+
+def exit_abruptly(**_kwargs) -> None:
+    import os
+
+    os._exit(3)

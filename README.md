@@ -54,9 +54,11 @@ make backend
 make frontend
 ```
 
-Open http://127.0.0.1:3000. Next.js renders each page on the server and proxies `/api` to http://127.0.0.1:8000. API docs are at http://127.0.0.1:8000/api/docs.
+Open http://127.0.0.1:3000. Next.js renders each page and serves `/api`. Its route handlers record each job in SQLite and call the Python converter at http://127.0.0.1:8000 (`CONVERTER_URL`). The converter's own docs are at http://127.0.0.1:8000/api/docs.
 
-You do not need a `.env` file for local development. Copy `.env.example` to `.env` when you want to change limits or CORS.
+`npm run dev` applies database migrations first. The local database is `frontend/data/app.db`. After changing `frontend/prisma/schema.prisma`, run `npm run db:migrate` in `frontend/` to create a migration. See [docs/DATABASE.md](docs/DATABASE.md).
+
+You do not need a `.env` file for local development. Copy `.env.example` to `.env` when you want to change limits.
 
 ## Tests
 
@@ -72,25 +74,42 @@ See [docs/TESTING.md](docs/TESTING.md).
 docker compose up -d --build
 ```
 
-The site is published on port 8080 and the API on `127.0.0.1:8000`. Put Caddy or Nginx in front for HTTPS. Details are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). The API is described in [docs/API.md](docs/API.md).
+Next.js is published on `HTTP_PORT` (8080). The Python converter has no published port; only Next.js can reach it. Uploads and the SQLite database are kept in Docker volumes, so they survive restarts and rebuilds. `docker compose down -v` deletes them.
+
+Before you open it to the internet:
+
+- Set `CONVERTER_TOKEN` in `.env` to a long random value, for example from `openssl rand -hex 32`, and `SITE_URL` to your public address.
+- Put HTTPS in front, such as Caddy, your hosting platform, or a CDN. Compose serves plain HTTP.
+- Add rate limiting there too. Nothing in this stack limits how often one address can run tools. Each conversion is time-limited, and at most `MAX_CONCURRENT_JOBS` run at once.
+- HTML to PDF in web-address mode loads public pages in Chromium. Its address check can be fooled by DNS rebinding, so block traffic from the containers to private and link-local ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`) in the server firewall.
+
+The API is described in [docs/API.md](docs/API.md), and the database in [docs/DATABASE.md](docs/DATABASE.md).
 
 ## Layout
 
 ```text
-frontend/     Next.js interface. The Python API stays in backend/
-backend/app   FastAPI routes, validation, and PDF services
+frontend/     Next.js site and public API: pages, /api route handlers, Prisma + SQLite
+backend/app   Internal Python converter: FastAPI routes, validation, and PDF services
 backend/tests API and processing tests
-docs/         API, testing, and deployment notes
+docs/         API, database, and testing notes
 ```
 
-New tools are added in `frontend/src/lib/tools.ts` and `backend/app/api/routes/tools.py`. The homepage reads the registry, so it does not need a new layout for each tool.
+## Adding a tool
+
+1. Add a function under `backend/app/services/pdf/` or `backend/app/services/convert/`.
+2. Add a route in `backend/app/api/routes/tools.py` and a catalog entry. Pass the function and its keyword arguments to `_finish`. It runs in a child process, so it must be a module-level function.
+3. Add a `status: "available"` entry with an `endpoint` in `frontend/src/lib/tools.ts`. The Next.js route at `/api/v1/tools/[tool]` only forwards tools listed there. The homepage reads the same registry, so it needs no new layout.
+4. Add options in `ToolOptionsForm` and `appendOptions` if the tool needs them.
+5. Add an API test that uses a real file and checks the download bytes.
 
 ## Processing and privacy
 
 - File types are detected from the contents, not only the extension.
 - Each job uses its own temporary directory. Downloads are served only for that job id.
 - Uploaded originals are deleted after a successful result. Finished downloads are kept until they expire, including across an API restart.
-- Limits for size, file count, and pages come from environment variables. Conversions also stop after `CONVERSION_TIMEOUT_SECONDS` (120 by default).
+- Limits for size, file count, and pages come from environment variables. Each conversion runs in its own process and is stopped after `CONVERSION_TIMEOUT_SECONDS` (120 by default). At most `MAX_CONCURRENT_JOBS` (2) run at once.
+- Rendering a page to an image stays within `MAX_IMAGE_PIXELS`. A very large page is rendered at a lower resolution, and the result says so.
+- Repeated pages in a page list are processed once.
 - Password-protected PDFs are rejected.
 - Word, Excel, and PowerPoint files are converted with LibreOffice. Macros are not run.
 - HTML files are rendered without scripts or network access. A web address must be public http or https. Private and local addresses are blocked.

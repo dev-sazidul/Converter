@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import logging
 import time
+from typing import Any, Callable
 
 from fastapi import APIRouter, File, Form, Request, UploadFile
 
 from app.config import Settings
-from app.errors import AppError, EmptyUploadError, InvalidOptionError, ProcessingFailedError
+from app.errors import AppError, BusyError, EmptyUploadError, InvalidOptionError, ProcessingFailedError
 from app.schemas import JobResponse
 from app.services.convert.html_policy import normalize_public_url
 from app.services.convert.html_to_pdf import html_file_to_pdf, html_url_to_pdf
@@ -27,6 +29,7 @@ from app.services.pdf.ranges import parse_bool, parse_choice, parse_int
 from app.services.pdf.rotate import rotate_pdfs
 from app.services.pdf.split import split_pdf
 from app.services.uploads import collect_files
+from app.services.worker import run_tool
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["tools"])
@@ -84,16 +87,57 @@ async def _accept(
     return job, saved
 
 
+async def _run(
+    request: Request,
+    job: Job,
+    fn: Callable[..., ProcessResult],
+    kwargs: dict[str, Any],
+) -> ProcessResult:
+    """Wait for a free job slot, then run the tool in its own process."""
+    settings: Settings = request.app.state.settings
+    store: JobStore = request.app.state.store
+    slots: asyncio.Semaphore = request.app.state.job_slots
+    try:
+        await asyncio.wait_for(slots.acquire(), timeout=settings.queue_timeout_seconds)
+    except asyncio.TimeoutError:
+        raise BusyError() from None
+    loop = asyncio.get_running_loop()
+    future = loop.run_in_executor(
+        None,
+        functools.partial(run_tool, fn, kwargs, timeout=settings.conversion_timeout_seconds),
+    )
+
+    def _release(done: asyncio.Future) -> None:
+        # The slot is freed when the process is gone, even if the client already left.
+        slots.release()
+        if not done.cancelled():
+            done.exception()
+
+    future.add_done_callback(_release)
+    try:
+        return await asyncio.shield(future)
+    except asyncio.CancelledError:
+        # The client left. Remove the job folder once the process has stopped writing to it.
+        future.add_done_callback(lambda _done: store.discard(job))
+        raise
+
+
 async def _finish(
     request: Request,
     job: Job,
     files: list[SavedFile],
-    work,
+    fn: Callable[..., ProcessResult],
+    /,
+    **kwargs: Any,
 ) -> JobResponse:
+    """Run ``fn(**kwargs)`` for ``job`` and describe the download.
+
+    The parameters before ``/`` are positional so a tool can take ``files=``.
+    """
     store: JobStore = request.app.state.store
     settings: Settings = request.app.state.settings
     try:
-        result: ProcessResult = await asyncio.to_thread(work)
+        result = await _run(request, job, fn, kwargs)
         result.meta["input_bytes"] = sum(item.size for item in files)
         result.meta["output_bytes"] = result.path.stat().st_size
         result.meta.setdefault("file_count", len(files))
@@ -137,7 +181,7 @@ async def merge_tool(
         min_files=2,
         min_message="Add at least two PDF files to merge.",
     )
-    return await _finish(request, job, saved, lambda: merge_pdfs(saved, job.directory))
+    return await _finish(request, job, saved, merge_pdfs, files=saved, directory=job.directory)
 
 
 @router.post("/tools/split", response_model=JobResponse)
@@ -178,14 +222,14 @@ async def split_tool(
         request,
         job,
         saved,
-        lambda: split_pdf(
-            saved[0],
-            job.directory,
-            mode=selected_mode,
-            ranges=ranges,
-            interval=selected_interval,
-            separate=parse_bool(separate),
-        ),
+        split_pdf,
+        source=saved[0],
+        directory=job.directory,
+        mode=selected_mode,
+        ranges=ranges,
+        interval=selected_interval,
+        separate=parse_bool(separate),
+        max_pages=settings.max_pages,
     )
 
 
@@ -212,7 +256,10 @@ async def compress_tool(
         request,
         job,
         saved,
-        lambda: compress_pdfs(saved, job.directory, quality=selected),
+        compress_pdfs,
+        files=saved,
+        directory=job.directory,
+        quality=selected,
     )
 
 
@@ -238,7 +285,11 @@ async def rotate_tool(
         request,
         job,
         saved,
-        lambda: rotate_pdfs(saved, job.directory, angle=selected_angle, pages=pages or "all"),
+        rotate_pdfs,
+        files=saved,
+        directory=job.directory,
+        angle=selected_angle,
+        pages=pages or "all",
     )
 
 
@@ -268,7 +319,11 @@ async def pdf_to_jpg_tool(
         request,
         job,
         saved,
-        lambda: pdf_to_jpg(saved[0], job.directory, dpi=selected_dpi, pages=pages or "all"),
+        pdf_to_jpg,
+        source=saved[0],
+        directory=job.directory,
+        dpi=selected_dpi,
+        pages=pages or "all",
     )
 
 
@@ -303,13 +358,12 @@ async def jpg_to_pdf_tool(
         request,
         job,
         saved,
-        lambda: jpg_to_pdf(
-            saved,
-            job.directory,
-            page_size=selected_size,
-            orientation=selected_orientation,
-            margin=selected_margin,
-        ),
+        jpg_to_pdf,
+        files=saved,
+        directory=job.directory,
+        page_size=selected_size,
+        orientation=selected_orientation,
+        margin=selected_margin,
     )
 
 
@@ -333,7 +387,7 @@ async def pdf_to_word_tool(
         min_files=1,
         min_message="Add a PDF to convert.",
     )
-    return await _finish(request, job, saved, lambda: pdf_to_word(saved[0], job.directory))
+    return await _finish(request, job, saved, pdf_to_word, source=saved[0], directory=job.directory)
 
 
 @router.post("/tools/word-to-pdf", response_model=JobResponse)
@@ -351,7 +405,7 @@ async def word_to_pdf_tool(
         min_files=1,
         min_message="Add a Word file to convert.",
     )
-    return await _finish(request, job, saved, lambda: convert_office_to_pdf(saved[0], job.directory))
+    return await _finish(request, job, saved, convert_office_to_pdf, source=saved[0], directory=job.directory)
 
 
 @router.post("/tools/pdf-to-excel", response_model=JobResponse)
@@ -369,7 +423,7 @@ async def pdf_to_excel_tool(
         min_files=1,
         min_message="Add a PDF to convert.",
     )
-    return await _finish(request, job, saved, lambda: pdf_to_excel(saved[0], job.directory))
+    return await _finish(request, job, saved, pdf_to_excel, source=saved[0], directory=job.directory)
 
 
 @router.post("/tools/excel-to-pdf", response_model=JobResponse)
@@ -387,7 +441,7 @@ async def excel_to_pdf_tool(
         min_files=1,
         min_message="Add an Excel file to convert.",
     )
-    return await _finish(request, job, saved, lambda: convert_office_to_pdf(saved[0], job.directory))
+    return await _finish(request, job, saved, convert_office_to_pdf, source=saved[0], directory=job.directory)
 
 
 @router.post("/tools/pdf-to-powerpoint", response_model=JobResponse)
@@ -415,7 +469,10 @@ async def pdf_to_powerpoint_tool(
         request,
         job,
         saved,
-        lambda: pdf_to_pptx(saved[0], job.directory, mode=selected),
+        pdf_to_pptx,
+        source=saved[0],
+        directory=job.directory,
+        mode=selected,
     )
 
 
@@ -434,7 +491,7 @@ async def powerpoint_to_pdf_tool(
         min_files=1,
         min_message="Add a PowerPoint file to convert.",
     )
-    return await _finish(request, job, saved, lambda: convert_office_to_pdf(saved[0], job.directory))
+    return await _finish(request, job, saved, convert_office_to_pdf, source=saved[0], directory=job.directory)
 
 
 @router.post("/tools/html-to-pdf", response_model=JobResponse)
@@ -458,7 +515,10 @@ async def html_to_pdf_tool(
             request,
             job,
             [],
-            lambda: html_url_to_pdf(target, job.directory, page_size=selected_size),
+            html_url_to_pdf,
+            url=target,
+            directory=job.directory,
+            page_size=selected_size,
         )
     _one(uploads, "Convert one HTML file at a time.")
     job, saved = await _accept(
@@ -473,7 +533,10 @@ async def html_to_pdf_tool(
         request,
         job,
         saved,
-        lambda: html_file_to_pdf(saved[0], job.directory, page_size=selected_size),
+        html_file_to_pdf,
+        source=saved[0],
+        directory=job.directory,
+        page_size=selected_size,
     )
 
 
@@ -498,5 +561,8 @@ async def pdf_to_pdfa_tool(
         request,
         job,
         saved,
-        lambda: pdf_to_pdfa(saved[0], job.directory, level=selected),
+        pdf_to_pdfa,
+        source=saved[0],
+        directory=job.directory,
+        level=selected,
     )

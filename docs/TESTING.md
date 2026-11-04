@@ -55,11 +55,12 @@ Frontend tests cover the tool registry, client-side file checks, page-list valid
 
 The full click-path in a browser is checked manually: open a tool, add a file, submit, and download. Browser file inputs are not driven by the API tests. Use the commands in the README to run both servers, then try Merge and JPG to PDF with your own files.
 
-Docker Compose is configuration. Build it on the deployment machine before relying on it:
+Check a Docker Compose build before relying on it. The converter has no published port, so test it through Next.js:
 
 ```bash
-docker compose build
-docker compose up -d
-curl -f http://127.0.0.1:8000/api/health
+docker compose up -d --build
 curl -f http://127.0.0.1:8080/healthz
+curl -f http://127.0.0.1:8080/api/health
 ```
+
+`/api/health` returns `"status":"ok"` only when the database and the converter both answer.

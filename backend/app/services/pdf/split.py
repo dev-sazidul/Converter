@@ -7,7 +7,14 @@ from pypdf import PdfReader, PdfWriter
 from app.errors import AppError, EncryptedPdfError, InvalidOptionError, ProcessingFailedError
 from app.services.jobs import ProcessResult, SavedFile
 from app.services.pdf.packaging import finalize_outputs
-from app.services.pdf.ranges import chunk_pages, flatten_groups, parse_range_groups
+from app.services.pdf.ranges import (
+    check_total,
+    chunk_pages,
+    flatten_groups,
+    parse_range_groups,
+    unique_groups,
+    unique_pages,
+)
 
 
 def split_pdf(
@@ -18,6 +25,7 @@ def split_pdf(
     ranges: str,
     interval: int,
     separate: bool,
+    max_pages: int,
 ) -> ProcessResult:
     page_count = source.pages or 0
     if mode == "pages":
@@ -26,8 +34,11 @@ def split_pdf(
         groups = chunk_pages(page_count, interval)
     elif mode == "ranges":
         groups = parse_range_groups(ranges, page_count)
-        if not separate:
-            groups = [flatten_groups(groups)]
+        if separate:
+            groups = unique_groups(groups)
+            check_total(groups, max_pages)
+        else:
+            groups = [unique_pages(flatten_groups(groups))]
     else:
         raise InvalidOptionError("Choose ranges, every page, or an interval.")
 

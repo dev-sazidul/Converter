@@ -3,6 +3,11 @@
 Uploaded documents are rendered from memory with JavaScript and network
 access turned off. Web pages may load public resources, and every request
 is checked again so a redirect cannot reach a private address or a local file.
+Service workers and WebSockets are blocked because request routing can't see them.
+
+The address check resolves DNS separately from Chromium, so a DNS-rebinding
+domain can still slip past it. Block private and link-local ranges for this
+container at the network level as well. See "Production" in the README.
 """
 
 from __future__ import annotations
@@ -73,7 +78,11 @@ def _render(directory: Path, *, page_size: str, html: str | None, url: str | Non
                     java_script_enabled=url is not None,
                     accept_downloads=False,
                     ignore_https_errors=False,
+                    # Requests made by a service worker skip page.route, so the address check would not see them.
+                    service_workers="block",
                 )
+                # WebSockets are not covered by page.route either. A printed page doesn't need them.
+                context.route_web_socket("**/*", lambda socket: socket.close())
                 page = context.new_page()
                 page.set_default_timeout(timeout_ms)
                 page.route("**/*", lambda route: _route(route, allow_network=url is not None))

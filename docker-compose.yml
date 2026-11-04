@@ -1,5 +1,12 @@
-# Single-VM production stack. Uploads live in ${DATA_DIR}/storage on the host,
-# outside the container writable layer. Do not run `docker compose down -v`.
+# Production stack. Next.js is the only published service (HTTP_PORT, 8080 by default).
+# The Python converter (backend) is reachable only from inside this Docker network.
+#
+# Uploads and the SQLite database live in the named volumes at the bottom. Docker
+# creates them owned by each image's user, so no chown is needed. They survive
+# `docker compose down` and rebuilds. `docker compose down -v` deletes them.
+#
+# This serves plain HTTP. Put HTTPS in front (Caddy, a hosting platform, or a CDN),
+# with an upload limit of about MAX_REQUEST_MB.
 
 name: convarter
 
@@ -11,7 +18,7 @@ services:
     environment:
       ENVIRONMENT: production
       STORAGE_DIR: /data/storage
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      CONVERTER_TOKEN: ${CONVERTER_TOKEN:-}
       MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-25}
       MAX_TOTAL_SIZE_MB: ${MAX_TOTAL_SIZE_MB:-100}
       MAX_FILES: ${MAX_FILES:-20}
@@ -22,9 +29,11 @@ services:
       ALLOWED_DPI: ${ALLOWED_DPI:-96,150,200}
       CONVERSION_TIMEOUT_SECONDS: ${CONVERSION_TIMEOUT_SECONDS:-120}
       HTML_NAVIGATION_TIMEOUT_SECONDS: ${HTML_NAVIGATION_TIMEOUT_SECONDS:-25}
+      MAX_CONCURRENT_JOBS: ${MAX_CONCURRENT_JOBS:-2}
+      QUEUE_TIMEOUT_SECONDS: ${QUEUE_TIMEOUT_SECONDS:-30}
       PDFA_ICC_PATH: ${PDFA_ICC_PATH:-}
     volumes:
-      - ${DATA_DIR:-./data}/storage:/data/storage
+      - storage:/data/storage
     expose:
       - "8000"
     healthcheck:
@@ -41,6 +50,9 @@ services:
       start_period: 25s
     restart: unless-stopped
     init: true
+    # LibreOffice and Chromium use a lot of memory. A runaway job is stopped here
+    # instead of pushing the whole VM into swap.
+    mem_limit: ${BACKEND_MEM_LIMIT:-2g}
     security_opt:
       - no-new-privileges:true
 
@@ -49,7 +61,6 @@ services:
       context: ./frontend
       args:
         SITE_URL: ${SITE_URL:-http://127.0.0.1:8080}
-        NEXT_PUBLIC_API_URL: ""
         NEXT_PUBLIC_ADSENSE_CLIENT: ${NEXT_PUBLIC_ADSENSE_CLIENT:-}
         NEXT_PUBLIC_ADSENSE_SLOT_HEADER: ${NEXT_PUBLIC_ADSENSE_SLOT_HEADER:-}
         NEXT_PUBLIC_ADSENSE_SLOT_HOME: ${NEXT_PUBLIC_ADSENSE_SLOT_HOME:-}
@@ -60,11 +71,18 @@ services:
     environment:
       PORT: 3000
       HOSTNAME: 0.0.0.0
-      API_PROXY_TARGET: http://backend:8000
+      CONVERTER_URL: http://backend:8000
+      CONVERTER_TOKEN: ${CONVERTER_TOKEN:-}
+      # Fixed here on purpose. An older .env may still hold the reserved Postgres URL.
+      DATABASE_URL: file:/data/db/app.db
       SITE_URL: ${SITE_URL:-http://127.0.0.1:8080}
+      # Largest request body Next.js forwards to the converter.
+      MAX_REQUEST_MB: ${MAX_REQUEST_MB:-120}
       NODE_ENV: production
-    expose:
-      - "3000"
+    volumes:
+      - database:/data/db
+    ports:
+      - "${HTTP_PORT:-8080}:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -79,37 +97,12 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 20s
     restart: unless-stopped
     init: true
+    mem_limit: ${FRONTEND_MEM_LIMIT:-768m}
     security_opt:
       - no-new-privileges:true
-
-  proxy:
-    build:
-      context: ./deploy/proxy
-    image: convarter-proxy:${IMAGE_TAG:-local}
-    environment:
-      DOMAIN: ${DOMAIN:-_}
-    ports:
-      - "${HTTP_PORT:-8080}:80"
-      - "${HTTPS_PORT:-8443}:443"
-    volumes:
-      - ${DATA_DIR:-./data}/certbot:/etc/letsencrypt
-      - ${DATA_DIR:-./data}/certbot-www:/var/www/certbot
-    depends_on:
-      frontend:
-        condition: service_healthy
-      backend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/healthz"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    restart: unless-stopped
-    init: true
 
   postgres:
     profiles: ["full"]
@@ -121,7 +114,7 @@ services:
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
-      - ${DATA_DIR:-./data}/postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-convarter}"]
       interval: 10s
@@ -135,3 +128,8 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
     restart: unless-stopped
+
+volumes:
+  storage:
+  database:
+  postgres:

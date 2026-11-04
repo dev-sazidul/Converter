@@ -9,7 +9,16 @@ import pymupdf
 from fastapi.testclient import TestClient
 from pypdf import PdfReader
 
-from tests.factories import encrypted_pdf_bytes, heavy_image_pdf_bytes, image_bytes, pdf_bytes
+from tests.factories import (
+    encrypted_pdf_bytes,
+    exit_abruptly,
+    explode_with_secret,
+    heavy_image_pdf_bytes,
+    huge_page_pdf_bytes,
+    image_bytes,
+    pdf_bytes,
+    sleep_forever,
+)
 
 
 def _files(*pairs: tuple[str, bytes, str]):
@@ -346,10 +355,7 @@ def test_download_is_limited_to_real_jobs(client):
 
 
 def test_internal_errors_stay_internal(client, monkeypatch):
-    def explode(*_args, **_kwargs):
-        raise RuntimeError("secret-token-do-not-leak /tmp/private")
-
-    monkeypatch.setattr("app.api.routes.tools.merge_pdfs", explode)
+    monkeypatch.setattr("app.api.routes.tools.merge_pdfs", explode_with_secret)
     response = client.post(
         "/api/v1/tools/merge",
         files=_files(

@@ -1,0 +1,35 @@
+// Convarter database. SQLite for now. docs/DATABASE.md explains the move to Postgres.
+// Keep to features that both databases support: no raw SQL in app code and no
+// SQLite-only column types. Then the move is a provider change and new migrations.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// One run of a tool. The Python converter keeps the file; this row keeps the record.
+/// Accounts will add a nullable userId here, so guests and signed-in users share one table.
+model Job {
+  id             String    @id @default(uuid())
+  tool           String
+  /// processing, ready, failed, or expired
+  status         String    @default("processing")
+  /// The job id inside the converter. It is never sent to the browser.
+  converterJobId String?   @unique
+  filename       String?
+  mediaType      String?
+  inputBytes     Int?
+  outputBytes    Int?
+  /// The error code shown to the person, such as invalid_pdf or busy.
+  errorCode      String?
+  createdAt      DateTime  @default(now())
+  finishedAt     DateTime?
+  expiresAt      DateTime?
+
+  @@index([createdAt])
+  @@index([status])
+}

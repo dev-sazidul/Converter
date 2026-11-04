@@ -15,7 +15,8 @@ BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 class Settings(BaseSettings):
     environment: str = "development"
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    # Shared secret the Next.js app sends in X-Converter-Token. Empty turns the check off.
+    converter_token: str = ""
     storage_dir: Path = BACKEND_ROOT / "storage"
     max_file_size_mb: int = 25
     max_total_size_mb: int = 100
@@ -27,6 +28,10 @@ class Settings(BaseSettings):
     allowed_dpi: str = "96,150,200"
     conversion_timeout_seconds: int = 120
     html_navigation_timeout_seconds: int = 25
+    # Jobs that run at the same time. LibreOffice and Chromium each use hundreds of MB.
+    max_concurrent_jobs: int = 2
+    # How long a job waits for a free slot before the API answers "busy".
+    queue_timeout_seconds: int = 30
     pdfa_icc_path: str = ""
 
     model_config = SettingsConfigDict(
@@ -44,6 +49,8 @@ class Settings(BaseSettings):
         "max_image_pixels",
         "conversion_timeout_seconds",
         "html_navigation_timeout_seconds",
+        "max_concurrent_jobs",
+        "queue_timeout_seconds",
     )
     @classmethod
     def must_be_positive(cls, value: int) -> int:
@@ -65,10 +72,6 @@ class Settings(BaseSettings):
     @property
     def max_total_bytes(self) -> int:
         return self.max_total_size_mb * 1024 * 1024
-
-    @property
-    def cors_origin_list(self) -> list[str]:
-        return [item.strip() for item in self.cors_origins.split(",") if item.strip()]
 
     @property
     def dpi_values(self) -> set[int]:

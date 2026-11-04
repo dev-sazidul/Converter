@@ -56,10 +56,38 @@ def flatten_groups(groups: list[list[int]]) -> list[int]:
     return [page for group in groups for page in group]
 
 
+def unique_pages(pages: list[int]) -> list[int]:
+    """Drop repeated pages and keep the first position of each one."""
+    return list(dict.fromkeys(pages))
+
+
+def unique_groups(groups: list[list[int]]) -> list[list[int]]:
+    """Drop ranges that repeat an earlier range exactly."""
+    seen: set[tuple[int, ...]] = set()
+    kept: list[list[int]] = []
+    for group in groups:
+        key = tuple(group)
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(group)
+    return kept
+
+
+def check_total(groups: list[list[int]], max_total: int) -> None:
+    """Stop overlapping ranges from writing many copies of the same pages."""
+    total = sum(len(group) for group in groups)
+    if total > max_total:
+        raise InvalidRangeError(
+            f"Those ranges add up to {total} {page_word(total)}. The limit is {max_total} pages in total."
+        )
+
+
 def parse_pages(spec: str, page_count: int) -> list[int]:
+    """Return each selected page once, in the order it was first listed."""
     if spec.strip().lower() == "all":
         return list(range(page_count))
-    return flatten_groups(parse_range_groups(spec, page_count))
+    return unique_pages(flatten_groups(parse_range_groups(spec, page_count)))
 
 
 def chunk_pages(page_count: int, interval: int) -> list[list[int]]:

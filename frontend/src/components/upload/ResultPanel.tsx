@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { Check, Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import type { JobResult } from "@/lib/api";
-import { apiUrl } from "@/lib/api";
 import type { ToolDefinition } from "@/lib/tools";
 import { formatBytes, formatDuration } from "@/lib/utils";
 
@@ -48,7 +47,7 @@ export function ResultPanel({
       )}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <a
-          href={apiUrl(result.download_url)}
+          href={result.download_url}
           download={result.filename}
           className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-base font-semibold text-white hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >

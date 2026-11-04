@@ -19,6 +19,7 @@ from pptx.util import Emu, Pt
 from app.errors import AppError, InvalidOptionError, ProcessingFailedError
 from app.services.jobs import ProcessResult, SavedFile
 from app.services.pdf.packaging import stem_name
+from app.services.pdf.render import page_pixmap
 
 _POINT = 12700
 
@@ -136,7 +137,7 @@ def _add_picture_bytes(slide, raw: bytes, bbox, scale: float) -> None:
 
 
 def _add_page_picture(slide, page: pymupdf.Page, slide_width: int, slide_height: int) -> None:
-    pixmap = page.get_pixmap(dpi=110, alpha=False, colorspace=pymupdf.csRGB)
+    pixmap, _reduced = page_pixmap(page, 110)
     image = pixmap.tobytes("jpeg")
     slide.shapes.add_picture(BytesIO(image), Emu(0), Emu(0), slide_width, slide_height)
 

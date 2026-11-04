@@ -1,20 +1,21 @@
 # API overview
 
-Interactive docs are served by the backend at `/api/docs` when it is running. This page is the short version.
+There are two layers with the same paths:
 
-Base URL in local development: `http://127.0.0.1:8000`
+- **Public API: Next.js.** The browser calls `/api/...` on the site's own origin. Next.js records each job in its SQLite database, streams the upload to the converter, and streams the download back. This is the only API reachable from the internet. Locally it is `http://127.0.0.1:3000`.
+- **Internal converter: Python (FastAPI).** It does the file work. It listens on port 8000 inside the Docker network only, and when `CONVERTER_TOKEN` is set it rejects any request without that value in `X-Converter-Token`. Its interactive docs are at `http://127.0.0.1:8000/api/docs` when you run it locally.
 
-The browser app calls the same paths. In development, Next.js proxies `/api` to the backend. In Docker, Nginx does the same, so the public site uses a relative `/api` path.
+The job id the public API returns is the Next.js database id. The converter's own job id is never sent to the browser.
 
 ## Health and limits
 
 `GET /api/health`
 
 ```json
-{ "status": "ok" }
+{ "status": "ok", "checks": { "database": true, "converter": true } }
 ```
 
-Returns 503 when the temporary storage directory is not writable.
+Returns 503 with `"status": "unavailable"` when the database or the converter does not answer. The converter's own `/api/health` returns 503 when its storage directory is not writable.
 
 `GET /api/v1/meta`
 
@@ -85,7 +86,7 @@ Errors use this shape:
 | --- | --- |
 | `empty_upload` | No file, or fewer files than the tool requires |
 | `too_many_files` | More than the configured file count |
-| `file_too_large` | One file exceeds the per-file limit |
+| `file_too_large` | One file exceeds the per-file limit, or the whole request exceeds `MAX_REQUEST_MB` (checked by Next.js) |
 | `total_too_large` | The combined upload exceeds the total limit |
 | `unsupported_type` | The bytes are not a type this tool accepts |
 | `invalid_pdf` | The PDF header or structure is unreadable |
@@ -95,17 +96,19 @@ Errors use this shape:
 | `too_many_pages` | The PDF exceeds the page limit |
 | `invalid_range` | The page list does not fit the document |
 | `invalid_option` | A form value is not one of the allowed choices |
-| `processing_failed` | Processing failed. The message does not include server paths or exception text |
+| `processing_failed` | Processing failed or took longer than `CONVERSION_TIMEOUT_SECONDS`. The message does not include server paths or exception text |
+| `busy` (503) | Every conversion slot stayed taken for `QUEUE_TIMEOUT_SECONDS`. Try again shortly |
+| `converter_unavailable` (503) | Next.js could not reach the converter |
 | `not_found` | The download is unknown or already removed |
 
 ## Example
 
 ```bash
-curl -s -F "files=@a.pdf" -F "files=@b.pdf" http://127.0.0.1:8000/api/v1/tools/merge
+curl -s -F "files=@a.pdf" -F "files=@b.pdf" http://127.0.0.1:3000/api/v1/tools/merge
 ```
 
 Use the `download_url` from the JSON for the second request.
 
 ```bash
-curl -L -o merged.pdf http://127.0.0.1:8000/api/v1/jobs/JOB_ID/download
+curl -L -o merged.pdf http://127.0.0.1:3000/api/v1/jobs/JOB_ID/download
 ```

@@ -1,15 +1,21 @@
-"""Convarter API application."""
+"""Convarter converter service.
+
+This API is internal. Only the Next.js app calls it, over the private Docker
+network. Browsers never reach it, so it has no CORS policy. When
+``CONVERTER_TOKEN`` is set, every request except the health check must send it
+in the ``X-Converter-Token`` header.
+"""
 
 from __future__ import annotations
 
 import asyncio
+import hmac
 import logging
 import time
 from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.routes import jobs, system, tools
@@ -32,7 +38,7 @@ def _configure_logging() -> None:
 async def _cleanup_loop(store: JobStore, interval: int) -> None:
     while True:
         await asyncio.sleep(max(5, interval))
-        removed = store.cleanup_expired()
+        removed = await asyncio.to_thread(store.cleanup_expired)
         if removed:
             logger.info("removed %s expired jobs", removed)
 
@@ -67,21 +73,22 @@ def create_app() -> FastAPI:
     )
     app.state.store = store
     app.state.settings = settings
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.cors_origin_list or ["http://localhost:5173"],
-        allow_methods=["GET", "POST", "OPTIONS"],
-        allow_headers=["*"],
-        expose_headers=["Content-Disposition"],
-        allow_credentials=False,
-    )
+    app.state.job_slots = asyncio.Semaphore(settings.max_concurrent_jobs)
+    token = settings.converter_token.encode("utf-8")
 
     @app.middleware("http")
     async def security_and_log(request: Request, call_next):
         started = time.perf_counter()
         path = request.url.path
         logged_path = "/api/v1/jobs/:id/download" if "/jobs/" in path else path
+        if token and path != "/api/health":
+            sent = request.headers.get("x-converter-token", "").encode("utf-8")
+            if not hmac.compare_digest(sent, token):
+                logger.warning("rejected request without converter token path=%s", logged_path)
+                return JSONResponse(
+                    status_code=401,
+                    content={"error": {"code": "unauthorized", "message": "This service is internal."}},
+                )
         try:
             response = await call_next(request)
         except Exception:

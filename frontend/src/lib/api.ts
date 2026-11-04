@@ -30,14 +30,6 @@ export const defaultLimits: Limits = {
   job_ttl_seconds: 3600,
 };
 
-const rawBase = process.env.NEXT_PUBLIC_API_URL ?? "";
-export const API_BASE = rawBase.replace(/\/$/, "");
-
-export function apiUrl(path: string): string {
-  if (/^https?:\/\//.test(path)) return path;
-  return `${API_BASE}${path}`;
-}
-
 export class ApiError extends Error {
   readonly code: string;
   readonly status: number;
@@ -92,7 +84,8 @@ export function postForm(
 ): Promise<JobResult> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", apiUrl(path));
+    // Same origin. Next.js forwards the upload to the converter.
+    xhr.open("POST", path);
     xhr.responseType = "json";
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && onProgress) {
@@ -122,7 +115,7 @@ export function postForm(
 }
 
 export async function getMeta(signal?: AbortSignal): Promise<ApiMeta> {
-  const response = await fetch(apiUrl("/api/v1/meta"), { signal });
+  const response = await fetch("/api/v1/meta", { signal });
   if (!response.ok) {
     throw new ApiError("network_error", "Couldn't load tool limits.", response.status);
   }
