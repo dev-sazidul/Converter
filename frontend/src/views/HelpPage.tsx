@@ -2,6 +2,7 @@
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { useLimits } from "@/components/limits/LimitsProvider";
+import { helpFaqs } from "@/lib/help-faq";
 import { container } from "@/lib/utils";
 
 export function HelpPage() {
@@ -32,18 +33,12 @@ export function HelpPage() {
       </ul>
       <h2 className="mt-10 text-xl font-semibold text-ink">Questions</h2>
       <div className="mt-4 space-y-5 text-sm leading-6">
-        <div>
-          <h3 className="font-semibold text-ink">Are my files stored?</h3>
-          <p className="text-muted">No. Files live in a temporary folder for the task and are deleted when the download expires or the server restarts. Convarter does not keep a document library.</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-ink">Why didn't compression make my PDF smaller?</h3>
-          <p className="text-muted">A PDF that is already compressed, especially one made of text, may not shrink. You'll still get a valid file back, and the result page will say the size stayed about the same.</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-ink">Which tools actually work?</h3>
-          <p className="text-muted">Merge, Split, Compress, Rotate, and the document conversion tools process files on the server. Anything marked Coming soon does not upload or convert a document.</p>
-        </div>
+        {helpFaqs.map((faq) => (
+          <div key={faq.question}>
+            <h3 className="font-semibold text-ink">{faq.question}</h3>
+            <p className="text-muted">{faq.answer}</p>
+          </div>
+        ))}
       </div>
     </article>
   );

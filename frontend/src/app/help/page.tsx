@@ -2,8 +2,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { HelpPage } from "@/views/HelpPage";
 import { pageMetadata } from "@/lib/metadata";
 
-const title = "Help — Convarter";
-const description = "How Convarter processes PDFs, file limits, and answers to common questions.";
+const title = "PDF Tool Help — Convarter";
+const description = "How Convarter processes PDFs, which file types work, the size and page limits, and answers about temporary files.";
 
 export const metadata = pageMetadata(title, description, "/help");
 

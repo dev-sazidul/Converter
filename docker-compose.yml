@@ -60,7 +60,7 @@ services:
     build:
       context: ./frontend
       args:
-        SITE_URL: ${SITE_URL:-http://127.0.0.1:8080}
+        SITE_URL: ${SITE_URL:-https://bestconvert.site}
         NEXT_PUBLIC_ADSENSE_CLIENT: ${NEXT_PUBLIC_ADSENSE_CLIENT:-}
         NEXT_PUBLIC_ADSENSE_SLOT_HEADER: ${NEXT_PUBLIC_ADSENSE_SLOT_HEADER:-}
         NEXT_PUBLIC_ADSENSE_SLOT_HOME: ${NEXT_PUBLIC_ADSENSE_SLOT_HOME:-}
@@ -75,7 +75,7 @@ services:
       CONVERTER_TOKEN: ${CONVERTER_TOKEN:-}
       # Fixed here on purpose. An older .env may still hold the reserved Postgres URL.
       DATABASE_URL: file:/data/db/app.db
-      SITE_URL: ${SITE_URL:-http://127.0.0.1:8080}
+      SITE_URL: ${SITE_URL:-https://bestconvert.site}
       # Largest request body Next.js forwards to the converter.
       MAX_REQUEST_MB: ${MAX_REQUEST_MB:-120}
       NODE_ENV: production

@@ -61,10 +61,13 @@ export function AdSlot({
         ) : (
           <img
             src={slotPlaceholders[slot]}
-            alt="Demo advertisement"
+            alt=""
+            width={format === "banner" ? 728 : 336}
+            height={format === "banner" ? 90 : 280}
             className="h-auto w-full"
             decoding="async"
-            loading={slot === "header" ? "eager" : "lazy"}
+            loading="lazy"
+            fetchPriority="low"
           />
         )}
       </div>
