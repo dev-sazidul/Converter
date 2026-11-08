@@ -18,8 +18,8 @@ const sans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin()),
-  title: "Convarter — PDF tools, clearly done",
-  description: "Merge, split, compress, rotate, and convert PDFs. Files are processed for the task and then deleted.",
+  title: "Free PDF Converter Online — Convarter",
+  description: "Free PDF converter to merge, split, compress, rotate, and convert documents. Files are processed for the task and then deleted.",
   applicationName: "Convarter",
   icons: { icon: "/favicon.svg" },
   manifest: "/site.webmanifest",

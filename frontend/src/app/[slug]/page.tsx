@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!tool) {
     return pageMetadata("Page not found — Convarter", "That page doesn't exist on Convarter.", `/${slug}`, false);
   }
-  return pageMetadata(tool.seoTitle, tool.seoDescription, `/${tool.slug}`);
+  return pageMetadata(tool.seoTitle, tool.seoDescription, `/${tool.slug}`, tool.status === "available");
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
