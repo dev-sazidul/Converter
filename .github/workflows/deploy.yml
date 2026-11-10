@@ -98,6 +98,21 @@ jobs:
           EOF
           ssh vps true
 
+      - name: Free disk space on VPS
+        run: |
+          ssh vps 'bash -s' <<'EOF'
+          set -eu
+          echo "Disk before cleanup:"
+          df -h /
+          docker system df || true
+          # Running containers keep their images. This only removes unused ones
+          # left behind by earlier deploys, including a failed image load.
+          docker image prune -af
+          docker builder prune -af || true
+          echo "Disk after cleanup:"
+          df -h /
+          EOF
+
       - name: Copy docker-compose and images to VPS
         run: |
           ssh vps "mkdir -p $(printf '%q' "$DEPLOY_PATH")"
