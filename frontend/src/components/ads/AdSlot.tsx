@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { adsenseClient, adsenseSlotId, slotPlaceholders, type AdSlotId } from "@/lib/ads";
+import { adsenseClient, adsenseSlotId, type AdSlotId } from "@/lib/ads";
 import { cn } from "@/lib/utils";
 
 const formatClass = {
@@ -41,36 +41,18 @@ export function AdSlot({
     }
   }, [client, live, slotId]);
 
+  if (!live) return null;
+
   return (
-    <aside
-      aria-label="Advertisement"
-      className={cn("mx-auto w-full", formatClass[format], className)}
-      data-ad-slot={slot}
-    >
-      <p className="mb-1 text-center text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Advertisement</p>
-      <div className="overflow-hidden rounded-xl border border-dashed border-line bg-white">
-        {live ? (
-          <ins
-            className="adsbygoogle"
-            style={{ display: "block" }}
-            data-ad-client={client}
-            data-ad-slot={slotId}
-            data-ad-format={format === "banner" ? "horizontal" : "rectangle"}
-            data-full-width-responsive="true"
-          />
-        ) : (
-          <img
-            src={slotPlaceholders[slot]}
-            alt=""
-            width={format === "banner" ? 728 : 336}
-            height={format === "banner" ? 90 : 280}
-            className="h-auto w-full"
-            decoding="async"
-            loading="lazy"
-            fetchPriority="low"
-          />
-        )}
-      </div>
+    <aside aria-label="Advertisement" className={cn("mx-auto w-full", formatClass[format], className)} data-ad-slot={slot}>
+      <ins
+        className="adsbygoogle"
+        style={{ display: "block" }}
+        data-ad-client={client}
+        data-ad-slot={slotId}
+        data-ad-format={format === "banner" ? "horizontal" : "rectangle"}
+        data-full-width-responsive="true"
+      />
     </aside>
   );
 }

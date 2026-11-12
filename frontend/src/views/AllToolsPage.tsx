@@ -5,9 +5,7 @@ import { container } from "@/lib/utils";
 export function AllToolsPage() {
   return (
     <div className="pb-8 pt-10">
-      <div className={`${container} pb-8`}>
-        <AdSlot slot="content" />
-      </div>
+      <AdSlot slot="content" className={`${container} pb-8`} />
       <ToolBrowser />
     </div>
   );
