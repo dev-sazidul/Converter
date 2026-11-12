@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "predev": "prisma migrate deploy",
-    "dev": "next dev --port 3000",
-    "build": "next build",
-    "start": "next start --port 3000",
+    "dev": "node init && next dev --port 3000",
+    "build": "node init && next build",
+    "start": "node init && next start --port 3000",
     "preview": "npm run build && npm run start",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",

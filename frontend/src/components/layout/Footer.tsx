@@ -6,9 +6,7 @@ import { container, focusRing } from "@/lib/utils";
 export function Footer() {
   return (
     <footer className="mt-16 border-t border-line bg-white">
-      <div className={`${container} pt-8`}>
-        <AdSlot slot="footer" />
-      </div>
+      <AdSlot slot="footer" className={`${container} pt-8`} />
       <div className={cnGrid()}>
         <div>
           <p className="text-base font-semibold text-ink">Convarter</p>
