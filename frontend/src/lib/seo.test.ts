@@ -75,4 +75,49 @@ describe("page metadata", () => {
     expect(head).toContain("Tom &amp; &quot;Jerry&quot;");
     expect(head).toContain("A &lt;description&gt;");
   });
+
+  it("enriches schema with FutureSolutionAI parentOrganization, creator and ecosystem sameAs", () => {
+    const homeHead = buildHeadTags(
+      { title: "Home — Convarter", description: "Home description.", path: "/" },
+      "https://bestconvert.site",
+    );
+    expect(homeHead).toContain("FutureSolutionAI");
+    expect(homeHead).toContain("https://futuresolutionai.com");
+    expect(homeHead).toContain("https://imagecustomize.site");
+    expect(homeHead).toContain("https://bestdownloader.site");
+
+    const toolHead = buildHeadTags(
+      { title: "Merge PDF — Convarter", description: "Merge tool.", path: "/merge-pdf" },
+      "https://bestconvert.site",
+    );
+    expect(toolHead).toContain('"creator":{"@type":"Organization","name":"FutureSolutionAI","url":"https://futuresolutionai.com"}');
+    expect(toolHead).toContain('"parentOrganization":{"@type":"Organization","name":"FutureSolutionAI","url":"https://futuresolutionai.com"}');
+  });
+
+  it("supports blog routing, indexability, and sitemap inclusion", () => {
+    expect(statusForPath("/blog")).toBe(200);
+    expect(statusForPath("/blog/compress-pdf-under-100kb-200kb")).toBe(200);
+    expect(statusForPath("/blog/not-a-real-blog")).toBe(404);
+
+    const paths = publicPaths();
+    expect(paths).toContain("/blog");
+    expect(paths).toContain("/blog/compress-pdf-under-100kb-200kb");
+    expect(paths).toContain("/blog/convert-pdf-tables-to-excel-cleanly");
+    expect(paths).toContain("/blog/pdf-vs-pdfa-long-term-archiving-guide");
+    expect(paths).toContain("/blog/prepare-jpg-images-before-merging-pdf");
+    expect(paths).toContain("/blog/convert-word-to-pdf-without-formatting-issues");
+    expect(paths).toContain("/blog/how-to-split-pdf-extract-pages-securely");
+
+    const blogHead = buildHeadTags(
+      {
+        title: "Compress PDF Under 100KB — Convarter",
+        description: "Compress PDF under 100KB guide.",
+        path: "/blog/compress-pdf-under-100kb-200kb",
+      },
+      "https://bestconvert.site",
+    );
+    expect(blogHead).toContain("BlogPosting");
+    expect(blogHead).toContain("BreadcrumbList");
+    expect(blogHead).toContain("How to Compress PDFs Under 100KB or 200KB");
+  });
 });

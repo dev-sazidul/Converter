@@ -44,6 +44,7 @@ export function ToolPage({ slug }: { slug: string }) {
         <div className="mt-8">
           {tool.status === "available" ? <ToolWorkspace key={tool.slug} tool={tool} /> : <ComingSoon slug={tool.slug} />}
         </div>
+        <ImageToolTip slug={tool.slug} />
         {tool.status === "available" && <ToolGuide slug={tool.slug} />}
         <AdSlot slot="tool" format="rectangle" className="mt-10" />
       </div>
@@ -124,5 +125,48 @@ function ComingSoon({ slug }: { slug: string }) {
         ))}
       </ul>
     </section>
+  );
+}
+
+function ImageToolTip({ slug }: { slug: string }) {
+  if (!["jpg-to-pdf", "pdf-to-jpg", "compress-pdf"].includes(slug)) return null;
+
+  return (
+    <div className="mt-8 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary-soft/60 to-primary-soft/20 p-4 sm:p-5 text-sm leading-6">
+      <div className="flex items-start gap-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-white text-base">
+          💡
+        </span>
+        <div>
+          <h3 className="font-semibold text-ink">Need to resize, crop, or convert images?</h3>
+          <p className="mt-1 text-muted">
+            {slug === "jpg-to-pdf" && (
+              <>
+                Only JPG and JPEG files can be added directly. If you have PNG, WebP, or HEIC images, or need to crop borders and adjust resolutions before converting to PDF, use our free sister tool{" "}
+              </>
+            )}
+            {slug === "pdf-to-jpg" && (
+              <>
+                After extracting your pages as JPGs, you can crop, resize dimensions, or convert them into PNG or WebP using our free sister tool{" "}
+              </>
+            )}
+            {slug === "compress-pdf" && (
+              <>
+                If your PDF is large because of high-resolution photos or scanned certificates, you can resize and compress individual images first using our free sister tool{" "}
+              </>
+            )}
+            <a
+              href="https://imagecustomize.site"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary underline underline-offset-2 hover:text-primary-dark"
+            >
+              ImageCustomize (imagecustomize.site)
+            </a>
+            {" "}— free online image resizer, compressor, and format converter with zero watermarks or limits.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

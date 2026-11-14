@@ -1,3 +1,4 @@
+import { getAllBlogs, getBlogBySlug } from "@/lib/blogs";
 import { helpFaqs } from "@/lib/help-faq";
 import { getToolCopy } from "@/lib/tool-content";
 import { availableTools, getTool } from "@/lib/tools";
@@ -8,7 +9,29 @@ export type PageHead = {
   path: string;
 };
 
-const STATIC_PATHS = new Set(["/", "/tools", "/convert-pdf", "/help", "/about", "/privacy", "/terms"]);
+const STATIC_PATHS = new Set(["/", "/tools", "/convert-pdf", "/help", "/about", "/privacy", "/terms", "/blog"]);
+
+const parentOrganizationNode = {
+  "@type": "Organization",
+  name: "FutureSolutionAI",
+  url: "https://futuresolutionai.com",
+};
+
+const ecosystemSameAs = [
+  "https://futuresolutionai.com",
+  "https://imagecustomize.site",
+  "https://bestdownloader.site",
+];
+
+function organizationNode(origin: string) {
+  return {
+    "@type": "Organization",
+    name: "Convarter",
+    url: origin,
+    sameAs: ecosystemSameAs,
+    parentOrganization: parentOrganizationNode,
+  };
+}
 
 export function normalizePath(pathname: string): string {
   const path = pathname.split("?")[0]?.split("#")[0] || "/";
@@ -19,6 +42,11 @@ export function normalizePath(pathname: string): string {
 export function statusForPath(pathname: string): number {
   const path = normalizePath(pathname);
   if (STATIC_PATHS.has(path)) return 200;
+  if (path.startsWith("/blog/")) {
+    const blogSlug = path.slice("/blog/".length);
+    if (!blogSlug || blogSlug.includes("/")) return 404;
+    return getBlogBySlug(blogSlug) ? 200 : 404;
+  }
   const slug = path.slice(1);
   if (!slug || slug.includes("/")) return 404;
   return getTool(slug) ? 200 : 404;
@@ -27,13 +55,22 @@ export function statusForPath(pathname: string): number {
 export function isIndexable(pathname: string): boolean {
   const path = normalizePath(pathname);
   if (STATIC_PATHS.has(path)) return true;
+  if (path.startsWith("/blog/")) {
+    const blogSlug = path.slice("/blog/".length);
+    if (!blogSlug || blogSlug.includes("/")) return false;
+    return Boolean(getBlogBySlug(blogSlug));
+  }
   const slug = path.slice(1);
   if (!slug || slug.includes("/")) return false;
   return getTool(slug)?.status === "available";
 }
 
 export function publicPaths(): string[] {
-  return [...STATIC_PATHS, ...availableTools().map((tool) => `/${tool.slug}`)];
+  return [
+    ...STATIC_PATHS,
+    ...availableTools().map((tool) => `/${tool.slug}`),
+    ...getAllBlogs().map((blog) => `/blog/${blog.slug}`),
+  ];
 }
 
 function escapeHtml(value: string): string {
@@ -71,6 +108,8 @@ export function structuredData(head: PageHead, origin: string): unknown {
   const url = absolute(origin, head.path);
   const slug = head.path.startsWith("/") ? head.path.slice(1) : "";
   const tool = slug ? getTool(slug) : undefined;
+  const org = organizationNode(origin);
+
   if (tool && tool.status === "available") {
     const copy = getToolCopy(tool.slug);
     const graph: unknown[] = [
@@ -82,7 +121,8 @@ export function structuredData(head: PageHead, origin: string): unknown {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        provider: { "@type": "Organization", name: "Convarter", url: origin },
+        provider: org,
+        creator: parentOrganizationNode,
       },
       breadcrumb(origin, [
         { name: "Home", path: "/" },
@@ -93,6 +133,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
     if (copy) graph.push(faqNode(copy.faqs));
     return { "@context": "https://schema.org", "@graph": graph };
   }
+
   if (tool) {
     return {
       "@context": "https://schema.org",
@@ -103,6 +144,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
           description: head.description,
           url,
           isPartOf: { "@type": "WebSite", name: "Convarter", url: origin },
+          publisher: org,
         },
         breadcrumb(origin, [
           { name: "Home", path: "/" },
@@ -112,25 +154,83 @@ export function structuredData(head: PageHead, origin: string): unknown {
       ],
     };
   }
+
   if (head.path === "/") {
     return {
       "@context": "https://schema.org",
       "@graph": [
         { "@type": "WebSite", name: "Convarter", url: origin, description: head.description },
-        { "@type": "Organization", name: "Convarter", url: origin },
+        org,
       ],
     };
   }
+
+  if (head.path === "/blog") {
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          name: head.title,
+          description: head.description,
+          url,
+          isPartOf: { "@type": "WebSite", name: "Convarter", url: origin },
+          publisher: org,
+        },
+        breadcrumb(origin, [
+          { name: "Home", path: "/" },
+          { name: "Blog", path: "/blog" },
+        ]),
+      ],
+    };
+  }
+
+  if (head.path.startsWith("/blog/")) {
+    const blogSlug = head.path.slice("/blog/".length);
+    const blog = getBlogBySlug(blogSlug);
+    if (blog) {
+      const graph: unknown[] = [
+        {
+          "@type": "BlogPosting",
+          headline: blog.title,
+          description: blog.summary,
+          url,
+          datePublished: blog.publishedAt,
+          dateModified: blog.publishedAt,
+          mainEntityOfPage: { "@type": "WebPage", "@id": url },
+          author: {
+            "@type": "Organization",
+            name: blog.author,
+            url: origin,
+          },
+          publisher: org,
+        },
+        breadcrumb(origin, [
+          { name: "Home", path: "/" },
+          { name: "Blog", path: "/blog" },
+          { name: blog.title, path: head.path },
+        ]),
+      ];
+      if (blog.faqs.length > 0) {
+        graph.push(faqNode(blog.faqs));
+      }
+      return { "@context": "https://schema.org", "@graph": graph };
+    }
+  }
+
   const page = {
     "@type": "WebPage",
     name: head.title,
     description: head.description,
     url,
     isPartOf: { "@type": "WebSite", name: "Convarter", url: origin },
+    publisher: org,
   };
+
   if (head.path === "/help") {
     return { "@context": "https://schema.org", "@graph": [page, faqNode(helpFaqs)] };
   }
+
   return { "@context": "https://schema.org", ...page };
 }
 

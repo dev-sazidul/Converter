@@ -68,6 +68,9 @@ export function Header() {
               {tool.name}
             </NavLink>
           ))}
+          <NavLink to="/blog" className={linkClass}>
+            Blog
+          </NavLink>
           <div className="relative" ref={convertRef}>
             <button
               type="button"
@@ -172,6 +175,9 @@ export function Header() {
             </NavLink>
             <NavLink to="/convert-pdf" className={linkClass} onClick={() => setMobileOpen(false)}>
               Convert PDF
+            </NavLink>
+            <NavLink to="/blog" className={linkClass} onClick={() => setMobileOpen(false)}>
+              Blog
             </NavLink>
             {availableTools().map((tool) => (
               <NavLink key={tool.slug} to={`/${tool.slug}`} className={linkClass} onClick={() => setMobileOpen(false)}>

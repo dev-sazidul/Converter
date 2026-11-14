@@ -12,7 +12,7 @@ COPY prisma ./prisma
 COPY src/lib/database-url.ts ./src/lib/database-url.ts
 RUN npm ci
 COPY . .
-ARG SITE_URL=http://127.0.0.1:3000
+ARG SITE_URL=https://bestconvert.site
 ARG NEXT_PUBLIC_ADSENSE_CLIENT=
 ARG NEXT_PUBLIC_ADSENSE_SLOT_HEADER=
 ARG NEXT_PUBLIC_ADSENSE_SLOT_HOME=
