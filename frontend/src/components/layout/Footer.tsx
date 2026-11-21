@@ -10,7 +10,7 @@ export function Footer() {
       <AdSlot slot="footer" className={`${container} pt-8`} />
       <div className={cnGrid()}>
         <div>
-          <p className="text-base font-semibold text-ink">Convarter</p>
+          <p className="text-base font-semibold text-ink">Converter</p>
           <p className="mt-2 max-w-xs text-sm leading-6 text-muted">
             PDF tools for everyday work. Documents are processed for the task and then deleted.
           </p>
@@ -92,7 +92,7 @@ export function Footer() {
       </div>
       <div className="border-t border-line">
         <p className={`${container} py-4 text-xs text-muted flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
-          <span>© {new Date().getFullYear()} Convarter. A Product of <a href="https://futuresolutionai.com" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:text-primary underline">FutureSolutionAI</a>. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Converter. A Product of <a href="https://futuresolutionai.com" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:text-primary underline">FutureSolutionAI</a>. All rights reserved.</span>
           <span>Files stay on the server only until the download expires.</span>
         </p>
       </div>

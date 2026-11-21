@@ -26,7 +26,7 @@ const ecosystemSameAs = [
 function organizationNode(origin: string) {
   return {
     "@type": "Organization",
-    name: "Convarter",
+    name: "Converter",
     url: origin,
     sameAs: ecosystemSameAs,
     parentOrganization: parentOrganizationNode,
@@ -143,7 +143,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
           name: head.title,
           description: head.description,
           url,
-          isPartOf: { "@type": "WebSite", name: "Convarter", url: origin },
+          isPartOf: { "@type": "WebSite", name: "Converter", url: origin },
           publisher: org,
         },
         breadcrumb(origin, [
@@ -159,7 +159,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
     return {
       "@context": "https://schema.org",
       "@graph": [
-        { "@type": "WebSite", name: "Convarter", url: origin, description: head.description },
+        { "@type": "WebSite", name: "Converter", url: origin, description: head.description },
         org,
       ],
     };
@@ -174,7 +174,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
           name: head.title,
           description: head.description,
           url,
-          isPartOf: { "@type": "WebSite", name: "Convarter", url: origin },
+          isPartOf: { "@type": "WebSite", name: "Converter", url: origin },
           publisher: org,
         },
         breadcrumb(origin, [
@@ -223,7 +223,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
     name: head.title,
     description: head.description,
     url,
-    isPartOf: { "@type": "WebSite", name: "Convarter", url: origin },
+    isPartOf: { "@type": "WebSite", name: "Converter", url: origin },
     publisher: org,
   };
 
@@ -243,7 +243,7 @@ export function buildHeadTags(head: PageHead, origin: string): string {
     `<meta name="description" content="${escapeHtml(head.description)}" />`,
     `<link rel="canonical" href="${escapeHtml(url)}" />`,
     `<meta name="robots" content="${robots}" />`,
-    `<meta property="og:site_name" content="Convarter" />`,
+    `<meta property="og:site_name" content="Converter" />`,
     `<meta property="og:type" content="website" />`,
     `<meta property="og:locale" content="en_US" />`,
     `<meta property="og:title" content="${escapeHtml(head.title)}" />`,

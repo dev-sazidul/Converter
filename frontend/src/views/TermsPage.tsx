@@ -9,7 +9,7 @@ export function TermsPage() {
       <AdSlot slot="content" className="mt-8" />
       <div className="mt-5 space-y-4 text-sm leading-7 text-muted">
         <p>
-          Convarter is provided as a document utility. You may only upload files you have the right to use. Don't use the service to break into systems, distribute malware, or process someone else's private documents without permission.
+          Converter is provided as a document utility. You may only upload files you have the right to use. Don't use the service to break into systems, distribute malware, or process someone else's private documents without permission.
         </p>
         <p>
           Processing can fail for damaged files, encrypted PDFs, or documents over the published limits. A failed task does not create a download. Results are generated automatically and may not match a hand-edited original.

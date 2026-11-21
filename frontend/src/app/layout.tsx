@@ -13,9 +13,9 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin()),
-  title: "Free PDF Converter Online — Convarter",
+  title: "Free PDF Converter Online — Converter",
   description: "Free PDF converter to merge, split, compress, rotate, and convert documents. Files are processed for the task and then deleted.",
-  applicationName: "Convarter",
+  applicationName: "Converter",
   icons: { icon: "/favicon.svg" },
   manifest: "/site.webmanifest",
 };

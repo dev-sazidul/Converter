@@ -1,4 +1,4 @@
-// Convarter database. SQLite for now. docs/DATABASE.md explains the move to Postgres.
+// Converter database. SQLite for now. docs/DATABASE.md explains the move to Postgres.
 // Keep to features that both databases support: no raw SQL in app code and no
 // SQLite-only column types. Then the move is a provider change and new migrations.
 

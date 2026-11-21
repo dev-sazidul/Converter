@@ -10,7 +10,7 @@ export function AboutPage() {
       <AdSlot slot="content" className="mt-8" />
       <div className="mt-5 space-y-4 text-sm leading-7 text-muted">
         <p>
-          Convarter is an independent PDF toolkit developed as part of the FutureSolutionAI ecosystem. It combines files, pulls pages apart, shrinks large documents, rotates pages, and converts between PDF, JPG, Word, Excel, PowerPoint, HTML, and PDF/A.
+          Converter is an independent PDF toolkit developed as part of the FutureSolutionAI ecosystem. It combines files, pulls pages apart, shrinks large documents, rotates pages, and converts between PDF, JPG, Word, Excel, PowerPoint, HTML, and PDF/A.
         </p>
         <p>
           The website sends files to an API on the same server. That API checks the file type, enforces size and page limits, does the work, and keeps the result only long enough to download. There are no accounts in this version.

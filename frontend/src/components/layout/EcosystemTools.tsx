@@ -110,7 +110,7 @@ export function EcosystemTools({ variant = "default", className = "" }: Ecosyste
           FutureSolutionAI Product Ecosystem
         </h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-muted">
-          Convarter is part of a suite of free web productivity tools and AI solutions engineered by{" "}
+          Converter is part of a suite of free web productivity tools and AI solutions engineered by{" "}
           <a
             href="https://futuresolutionai.com"
             target="_blank"

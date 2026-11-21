@@ -7,13 +7,13 @@ describe("page metadata", () => {
   it("includes a title, description, canonical URL, and structured data", () => {
     const head = buildHeadTags(
       {
-        title: "Home — Convarter",
+        title: "Home — Converter",
         description: "Merge, split, compress, rotate, and convert PDFs in your browser. Files are processed for the task and then deleted.",
         path: "/",
       },
       "https://convarter.example",
     );
-    expect(head).toContain("<title>Home — Convarter</title>");
+    expect(head).toContain("<title>Home — Converter</title>");
     expect(head).toContain('rel="canonical" href="https://convarter.example/"');
     expect(head).toContain("og:description");
     expect(head).toContain("WebSite");
@@ -21,7 +21,7 @@ describe("page metadata", () => {
 
   it("marks tool pages and unknown addresses", () => {
     const tool = buildHeadTags(
-      { title: "Merge PDF online — Convarter", description: "Combine PDFs.", path: "/merge-pdf" },
+      { title: "Merge PDF online — Converter", description: "Combine PDFs.", path: "/merge-pdf" },
       "https://convarter.example",
     );
     expect(tool).toContain("SoftwareApplication");
@@ -40,7 +40,7 @@ describe("page metadata", () => {
     expect(paths).not.toContain("/sign-pdf");
     expect(paths).not.toContain("/edit-pdf");
     const soon = buildHeadTags(
-      { title: "Edit PDF — coming soon — Convarter", description: "Not available.", path: "/edit-pdf" },
+      { title: "Edit PDF — coming soon — Converter", description: "Not available.", path: "/edit-pdf" },
       "https://convarter.example",
     );
     expect(soon).toContain("noindex, follow");
@@ -78,7 +78,7 @@ describe("page metadata", () => {
 
   it("enriches schema with FutureSolutionAI parentOrganization, creator and ecosystem sameAs", () => {
     const homeHead = buildHeadTags(
-      { title: "Home — Convarter", description: "Home description.", path: "/" },
+      { title: "Home — Converter", description: "Home description.", path: "/" },
       "https://bestconvert.site",
     );
     expect(homeHead).toContain("FutureSolutionAI");
@@ -87,7 +87,7 @@ describe("page metadata", () => {
     expect(homeHead).toContain("https://bestdownloader.site");
 
     const toolHead = buildHeadTags(
-      { title: "Merge PDF — Convarter", description: "Merge tool.", path: "/merge-pdf" },
+      { title: "Merge PDF — Converter", description: "Merge tool.", path: "/merge-pdf" },
       "https://bestconvert.site",
     );
     expect(toolHead).toContain('"creator":{"@type":"Organization","name":"FutureSolutionAI","url":"https://futuresolutionai.com"}');
@@ -110,7 +110,7 @@ describe("page metadata", () => {
 
     const blogHead = buildHeadTags(
       {
-        title: "Compress PDF Under 100KB — Convarter",
+        title: "Compress PDF Under 100KB — Converter",
         description: "Compress PDF under 100KB guide.",
         path: "/blog/compress-pdf-under-100kb-200kb",
       },

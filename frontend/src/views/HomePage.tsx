@@ -30,7 +30,7 @@ export function HomePage() {
         <div className="mx-auto max-w-3xl">
           <h2 className="text-2xl font-semibold tracking-tight text-ink">A free PDF converter for everyday files</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Convarter on bestconvert.site merges, splits, compresses, and rotates PDFs, and converts between PDF, Word, Excel, PowerPoint, JPG, HTML, and PDF/A. There is no account. A finished file stays available only until the download expires.
+            Converter on bestconvert.site merges, splits, compresses, and rotates PDFs, and converts between PDF, Word, Excel, PowerPoint, JPG, HTML, and PDF/A. There is no account. A finished file stays available only until the download expires.
           </p>
           <h3 className="mt-8 text-lg font-semibold text-ink">Organize a PDF</h3>
           <p className="mt-2 text-sm leading-6 text-muted">

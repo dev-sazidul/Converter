@@ -14,7 +14,7 @@ export function PrivacyPage() {
       <AdSlot slot="content" className="mt-8" />
       <div className="mt-5 space-y-4 text-sm leading-7 text-muted">
         <p>
-          Convarter processes files so you can download a result. Uploaded documents and finished files are stored in a private temporary folder, not in a user account.
+          Converter processes files so you can download a result. Uploaded documents and finished files are stored in a private temporary folder, not in a user account.
         </p>
         <p>
           A finished download is available for about {hours === 1 ? "1 hour" : `${hours} hours`}. After that, or when the server restarts, the files are deleted. Uploaded originals are removed as soon as processing finishes.
