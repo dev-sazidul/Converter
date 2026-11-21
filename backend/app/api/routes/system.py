@@ -23,7 +23,7 @@ def health(request: Request):
 def meta(request: Request) -> MetaResponse:
     settings = request.app.state.settings
     return MetaResponse(
-        name="Convarter",
+        name="Converter",
         limits=LimitsResponse(
             max_file_size_mb=settings.max_file_size_mb,
             max_total_size_mb=settings.max_total_size_mb,

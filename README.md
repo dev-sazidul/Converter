@@ -1,6 +1,6 @@
-# Convarter
+# Converter
 
-Convarter is a PDF tools site you can run on your own domain. It merges, splits, compresses, and rotates PDFs, converts between PDF and JPG, and converts Word, Excel, PowerPoint, HTML, and PDF/A.
+Converter is a PDF tools site you can run on your own domain. It merges, splits, compresses, and rotates PDFs, converts between PDF and JPG, and converts Word, Excel, PowerPoint, HTML, and PDF/A.
 
 The interface is original. It is not a copy of another product's brand.
 

@@ -3,8 +3,8 @@ import { NotFoundPage } from "@/views/NotFoundPage";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = pageMetadata(
-  "Page not found — Convarter",
-  "That page doesn't exist on Convarter.",
+  "Page not found — Converter",
+  "That page doesn't exist on Converter.",
   "/404",
   false,
 );

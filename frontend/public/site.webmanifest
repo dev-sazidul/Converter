@@ -1,6 +1,6 @@
 {
-  "name": "Convarter",
-  "short_name": "Convarter",
+  "name": "Converter",
+  "short_name": "Converter",
   "description": "Merge, split, compress, rotate, and convert PDFs.",
   "start_url": "/",
   "display": "standalone",

@@ -11,7 +11,7 @@ export function HelpPage() {
   return (
     <article className={`${container} max-w-3xl py-12`}>
       <p className="text-sm font-semibold text-primary">Help</p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">How Convarter works</h1>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">How Converter works</h1>
       <ol className="mt-6 space-y-3 text-sm leading-6 text-ink">
         <li>1. Choose a tool and add your files.</li>
         <li>2. Set the options, such as page order, ranges, or image quality.</li>

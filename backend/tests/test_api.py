@@ -32,7 +32,7 @@ def test_health_and_meta(client):
     meta = client.get("/api/v1/meta")
     assert meta.status_code == 200
     body = meta.json()
-    assert body["name"] == "Convarter"
+    assert body["name"] == "Converter"
     assert len(body["tools"]) == 14
     assert {item["slug"] for item in body["tools"]} == {
         "merge-pdf",

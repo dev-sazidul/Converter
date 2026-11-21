@@ -10,7 +10,7 @@ Last updated: 2026-11-04
 
 ## Done
 
-- Original Convarter interface: navigation, search, categories, tool pages, upload, options, progress, success, and error states.
+- Original Converter interface: navigation, search, categories, tool pages, upload, options, progress, success, and error states.
 - Fourteen working tools wired to the API: merge, split, compress, rotate, PDF to JPG, JPG to PDF, PDF to Word, Word to PDF, PDF to Excel, Excel to PDF, PDF to PowerPoint, PowerPoint to PDF, HTML to PDF, and PDF to PDF/A.
 - FastAPI converter with content checks, size and page limits, per-job temporary folders, expiring downloads, and startup cleanup. It is internal: only Next.js calls it, optionally with `CONVERTER_TOKEN`.
 - Next.js public API under `/api`. It records each job in SQLite through Prisma 7, streams uploads to the converter, and streams downloads back. See docs/DATABASE.md.

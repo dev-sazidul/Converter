@@ -2,7 +2,7 @@ export const helpFaqs = [
   {
     question: "Are my files stored?",
     answer:
-      "No. Files live in a temporary folder for the task and are deleted when the download expires or the server restarts. Convarter does not keep a document library.",
+      "No. Files live in a temporary folder for the task and are deleted when the download expires or the server restarts. Converter does not keep a document library.",
   },
   {
     question: "Why didn't compression make my PDF smaller?",

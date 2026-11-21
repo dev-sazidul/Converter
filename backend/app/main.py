@@ -1,4 +1,4 @@
-"""Convarter converter service.
+"""Converter converter service.
 
 This API is internal. Only the Next.js app calls it, over the private Docker
 network. Browsers never reach it, so it has no CORS policy. When
@@ -63,7 +63,7 @@ def create_app() -> FastAPI:
                 await task
 
     app = FastAPI(
-        title="Convarter API",
+        title="Converter API",
         version="1.0.0",
         summary="PDF tools for organizing, optimizing, and converting documents.",
         docs_url="/api/docs",

@@ -7,13 +7,13 @@ describe("page metadata", () => {
   it("includes a title, description, canonical URL, and structured data", () => {
     const head = buildHeadTags(
       {
-        title: "Home — Convarter",
+        title: "Home — Converter",
         description: "Merge, split, compress, rotate, and convert PDFs in your browser. Files are processed for the task and then deleted.",
         path: "/",
       },
       "https://convarter.example",
     );
-    expect(head).toContain("<title>Home — Convarter</title>");
+    expect(head).toContain("<title>Home — Converter</title>");
     expect(head).toContain('rel="canonical" href="https://convarter.example/"');
     expect(head).toContain("og:description");
     expect(head).toContain("WebSite");
@@ -21,7 +21,7 @@ describe("page metadata", () => {
 
   it("marks tool pages and unknown addresses", () => {
     const tool = buildHeadTags(
-      { title: "Merge PDF online — Convarter", description: "Combine PDFs.", path: "/merge-pdf" },
+      { title: "Merge PDF online — Converter", description: "Combine PDFs.", path: "/merge-pdf" },
       "https://convarter.example",
     );
     expect(tool).toContain("SoftwareApplication");
@@ -40,7 +40,7 @@ describe("page metadata", () => {
     expect(paths).not.toContain("/sign-pdf");
     expect(paths).not.toContain("/edit-pdf");
     const soon = buildHeadTags(
-      { title: "Edit PDF — coming soon — Convarter", description: "Not available.", path: "/edit-pdf" },
+      { title: "Edit PDF — coming soon — Converter", description: "Not available.", path: "/edit-pdf" },
       "https://convarter.example",
     );
     expect(soon).toContain("noindex, follow");
@@ -74,5 +74,50 @@ describe("page metadata", () => {
     );
     expect(head).toContain("Tom &amp; &quot;Jerry&quot;");
     expect(head).toContain("A &lt;description&gt;");
+  });
+
+  it("enriches schema with FutureSolutionAI parentOrganization, creator and ecosystem sameAs", () => {
+    const homeHead = buildHeadTags(
+      { title: "Home — Converter", description: "Home description.", path: "/" },
+      "https://bestconvert.site",
+    );
+    expect(homeHead).toContain("FutureSolutionAI");
+    expect(homeHead).toContain("https://futuresolutionai.com");
+    expect(homeHead).toContain("https://imagecustomize.site");
+    expect(homeHead).toContain("https://bestdownloader.site");
+
+    const toolHead = buildHeadTags(
+      { title: "Merge PDF — Converter", description: "Merge tool.", path: "/merge-pdf" },
+      "https://bestconvert.site",
+    );
+    expect(toolHead).toContain('"creator":{"@type":"Organization","name":"FutureSolutionAI","url":"https://futuresolutionai.com"}');
+    expect(toolHead).toContain('"parentOrganization":{"@type":"Organization","name":"FutureSolutionAI","url":"https://futuresolutionai.com"}');
+  });
+
+  it("supports blog routing, indexability, and sitemap inclusion", () => {
+    expect(statusForPath("/blog")).toBe(200);
+    expect(statusForPath("/blog/compress-pdf-under-100kb-200kb")).toBe(200);
+    expect(statusForPath("/blog/not-a-real-blog")).toBe(404);
+
+    const paths = publicPaths();
+    expect(paths).toContain("/blog");
+    expect(paths).toContain("/blog/compress-pdf-under-100kb-200kb");
+    expect(paths).toContain("/blog/convert-pdf-tables-to-excel-cleanly");
+    expect(paths).toContain("/blog/pdf-vs-pdfa-long-term-archiving-guide");
+    expect(paths).toContain("/blog/prepare-jpg-images-before-merging-pdf");
+    expect(paths).toContain("/blog/convert-word-to-pdf-without-formatting-issues");
+    expect(paths).toContain("/blog/how-to-split-pdf-extract-pages-securely");
+
+    const blogHead = buildHeadTags(
+      {
+        title: "Compress PDF Under 100KB — Converter",
+        description: "Compress PDF under 100KB guide.",
+        path: "/blog/compress-pdf-under-100kb-200kb",
+      },
+      "https://bestconvert.site",
+    );
+    expect(blogHead).toContain("BlogPosting");
+    expect(blogHead).toContain("BreadcrumbList");
+    expect(blogHead).toContain("How to Compress PDFs Under 100KB or 200KB");
   });
 });

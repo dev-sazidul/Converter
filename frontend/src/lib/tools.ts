@@ -58,7 +58,7 @@ export const tools: ToolDefinition[] = [
     processingLabel: "Merging PDFs…",
     endpoint: "/api/v1/tools/merge",
     featured: true,
-    seoTitle: "Merge PDF Online Free — Convarter",
+    seoTitle: "Merge PDF Online Free — Converter",
     seoDescription: "Merge PDF files online into one document. Set the page order, then download the combined PDF. Files are removed after the download expires.",
   },
   {
@@ -82,7 +82,7 @@ export const tools: ToolDefinition[] = [
     processingLabel: "Splitting PDF…",
     endpoint: "/api/v1/tools/split",
     featured: true,
-    seoTitle: "Split PDF Online Free — Convarter",
+    seoTitle: "Split PDF Online Free — Converter",
     seoDescription: "Split a PDF online by page ranges, into single pages, or every few pages. Download one PDF or a ZIP of the parts.",
   },
   {
@@ -106,7 +106,7 @@ export const tools: ToolDefinition[] = [
     processingLabel: "Compressing PDF…",
     endpoint: "/api/v1/tools/compress",
     featured: true,
-    seoTitle: "Compress PDF Online Free — Convarter",
+    seoTitle: "Compress PDF Online Free — Converter",
     seoDescription: "Compress a PDF online to a smaller file. Photos shrink the most. A text-only PDF may change very little. Download the result when it is ready.",
   },
   {
@@ -129,7 +129,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Rotate PDF",
     processingLabel: "Rotating PDF…",
     endpoint: "/api/v1/tools/rotate",
-    seoTitle: "Rotate PDF Pages Online — Convarter",
+    seoTitle: "Rotate PDF Pages Online — Converter",
     seoDescription: "Rotate PDF pages online by 90, 180, or 270 degrees clockwise. Turn every page, or only the page numbers you list.",
   },
   {
@@ -152,7 +152,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to JPG",
     processingLabel: "Converting to JPG…",
     endpoint: "/api/v1/tools/pdf-to-jpg",
-    seoTitle: "PDF to JPG Converter Online — Convarter",
+    seoTitle: "PDF to JPG Converter Online — Converter",
     seoDescription: "Convert PDF pages to JPG images online. Choose screen, standard, or high resolution. One image downloads directly. Several pages arrive in a ZIP.",
   },
   {
@@ -175,7 +175,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Create PDF",
     processingLabel: "Creating PDF…",
     endpoint: "/api/v1/tools/jpg-to-pdf",
-    seoTitle: "JPG to PDF Converter Online — Convarter",
+    seoTitle: "JPG to PDF Converter Online — Converter",
     seoDescription: "Convert JPG and JPEG images to one PDF online. Reorder the pictures and fit each image, or place them on A4 or Letter pages.",
   },
   {
@@ -198,7 +198,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to Word",
     processingLabel: "Converting to Word…",
     endpoint: "/api/v1/tools/pdf-to-word",
-    seoTitle: "PDF to Word Converter Online — Convarter",
+    seoTitle: "PDF to Word Converter Online — Converter",
     seoDescription: "Convert a PDF to an editable Word document online. Text, tables, and images are copied across. Complex layouts may not match the PDF exactly.",
   },
   {
@@ -221,7 +221,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/word-to-pdf",
-    seoTitle: "Word to PDF Converter Online — Convarter",
+    seoTitle: "Word to PDF Converter Online — Converter",
     seoDescription: "Convert a DOC or DOCX file to PDF online. The file type is checked from its contents. A missing font may be substituted.",
   },
   {
@@ -244,7 +244,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to Excel",
     processingLabel: "Converting to Excel…",
     endpoint: "/api/v1/tools/pdf-to-excel",
-    seoTitle: "PDF to Excel Converter Online — Convarter",
+    seoTitle: "PDF to Excel Converter Online — Converter",
     seoDescription: "Convert PDF tables to an Excel workbook online. Each detected table becomes a sheet. Scanned pages without selectable text cannot be converted.",
   },
   {
@@ -267,7 +267,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/excel-to-pdf",
-    seoTitle: "Excel to PDF Converter Online — Convarter",
+    seoTitle: "Excel to PDF Converter Online — Converter",
     seoDescription: "Convert an XLS or XLSX spreadsheet to PDF online. The file type is checked from its contents. A missing font may be substituted.",
   },
   {
@@ -290,7 +290,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PowerPoint",
     processingLabel: "Converting to PowerPoint…",
     endpoint: "/api/v1/tools/pdf-to-powerpoint",
-    seoTitle: "PDF to PowerPoint Converter — Convarter",
+    seoTitle: "PDF to PowerPoint Converter — Converter",
     seoDescription: "Convert PDF pages to PowerPoint slides online. Use editable text where the page has selectable text, or keep each page as a slide image.",
   },
   {
@@ -313,7 +313,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/powerpoint-to-pdf",
-    seoTitle: "PowerPoint to PDF Converter — Convarter",
+    seoTitle: "PowerPoint to PDF Converter — Converter",
     seoDescription: "Convert a PPT or PPTX slide deck to PDF online. The file type is checked from its contents. A missing font may be substituted.",
   },
   {
@@ -336,7 +336,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/html-to-pdf",
-    seoTitle: "HTML to PDF Converter Online — Convarter",
+    seoTitle: "HTML to PDF Converter Online — Converter",
     seoDescription: "Convert an HTML file or a public web page to PDF online. Private and local addresses are blocked. Uploaded HTML is rendered without scripts.",
   },
   {
@@ -359,7 +359,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF/A",
     processingLabel: "Converting to PDF/A…",
     endpoint: "/api/v1/tools/pdf-to-pdfa",
-    seoTitle: "PDF to PDF/A Converter Online — Convarter",
+    seoTitle: "PDF to PDF/A Converter Online — Converter",
     seoDescription: "Convert a PDF to PDF/A-1b, PDF/A-2b, or PDF/A-3b online. Archive markers are checked before download. This is not a full ISO certification.",
   },
   soon("edit-pdf", "Edit PDF", "Add text, shapes, and comments to a PDF.", "edit", "pen"),
@@ -398,8 +398,8 @@ function soon(
     dropLabel: "",
     actionLabel: "",
     processingLabel: "",
-    seoTitle: `${name} — coming soon — Convarter`,
-    seoDescription: `${description} This Convarter tool is planned and not available yet.`,
+    seoTitle: `${name} — coming soon — Converter`,
+    seoDescription: `${description} This Converter tool is planned and not available yet.`,
   };
 }
 

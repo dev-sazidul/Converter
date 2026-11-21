@@ -14,7 +14,7 @@ export function pageMetadata(title: string, description: string, path: string, i
       title,
       description,
       url: path,
-      siteName: "Convarter",
+      siteName: "Converter",
       type: "website",
       locale: "en_US",
     },

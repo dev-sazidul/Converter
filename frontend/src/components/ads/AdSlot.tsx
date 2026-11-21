@@ -24,7 +24,7 @@ export function AdSlot({
 
   useEffect(() => {
     if (!live) return;
-    const scriptId = "convarter-adsense";
+    const scriptId = "converter-adsense";
     if (!document.getElementById(scriptId)) {
       const script = document.createElement("script");
       script.id = scriptId;
