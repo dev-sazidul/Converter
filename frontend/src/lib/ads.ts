@@ -9,7 +9,7 @@ const slotEnv: Record<AdSlotId, string | undefined> = {
 };
 
 export function adsenseClient(): string {
-  return (process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "").trim();
+  return "ca-pub-5871594289590523";
 }
 
 export function adsenseSlotId(slot: AdSlotId): string {

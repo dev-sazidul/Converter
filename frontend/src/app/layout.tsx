@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { GA_MEASUREMENT_ID } from "@/lib/ga";
+import { adsenseClient } from "@/lib/ads";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -27,6 +28,8 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const adsensePublisherId = adsenseClient();
+
   return (
     <html lang="en">
       <head>
@@ -35,6 +38,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link
           href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
           rel="stylesheet"
+        />
+        <script
+          id="convarter-adsense"
+          async
+          crossOrigin="anonymous"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(adsensePublisherId)}`}
         />
       </head>
       <body className="font-sans">

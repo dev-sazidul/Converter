@@ -8,7 +8,7 @@ import { formatBytes } from "@/lib/utils";
 
 describe("ads", () => {
   it("keeps the AdSense client and slot configuration", () => {
-    expect(adsenseClient()).toBe((process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "").trim());
+    expect(adsenseClient()).toBe("ca-pub-5871594289590523");
     expect(adsenseSlotId("content")).toBe((process.env.NEXT_PUBLIC_ADSENSE_SLOT_CONTENT ?? "").trim());
   });
 });
