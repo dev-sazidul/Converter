@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { GA_MEASUREMENT_ID } from "@/lib/ga";
-import { AdPopup } from "@/components/ads/AdPopup";
 import { AdSlot } from "@/components/ads/AdSlot";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -59,10 +58,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               Skip to content
             </a>
             <Header />
-            <div className={`${container} pt-4`}>
-              <AdSlot slot="header" />
-            </div>
-            <AdPopup />
+            <AdSlot slot="header" className={`${container} pt-4`} />
             <main id="main" className="flex-1">
               {children}
             </main>

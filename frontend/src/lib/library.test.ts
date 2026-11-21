@@ -3,14 +3,13 @@ import { ApiError, toApiError } from "@/lib/api";
 import { defaultLimits } from "@/lib/api";
 import { isJpegFile, matchesContent, validateHtmlUrl, validateIncomingFiles, validatePageList, validateReady } from "@/lib/files";
 import { availableTools, getTool, tools } from "@/lib/tools";
-import { POPUP_INTERVAL_MS, popupCreatives } from "@/lib/ads";
+import { adsenseClient, adsenseSlotId } from "@/lib/ads";
 import { formatBytes } from "@/lib/utils";
 
 describe("ads", () => {
-  it("brings the popup back 20 seconds after it closes", () => {
-    expect(POPUP_INTERVAL_MS).toBe(20_000);
-    expect(popupCreatives.length).toBeGreaterThan(0);
-    expect(popupCreatives.some((creative) => creative.kind === "video")).toBe(true);
+  it("keeps the AdSense client and slot configuration", () => {
+    expect(adsenseClient()).toBe((process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "").trim());
+    expect(adsenseSlotId("content")).toBe((process.env.NEXT_PUBLIC_ADSENSE_SLOT_CONTENT ?? "").trim());
   });
 });
 
