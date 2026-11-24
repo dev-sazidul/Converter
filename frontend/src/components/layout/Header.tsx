@@ -139,7 +139,7 @@ export function Header() {
             {moreOpen && (
               <div
                 id="more-menu"
-                className="z-40 max-h-[min(32rem,calc(100vh-5.5rem))] overflow-y-auto rounded-2xl border border-line bg-white p-6 shadow-card max-lg:fixed max-lg:inset-x-4 max-lg:top-16 lg:absolute lg:right-0 lg:top-12 lg:w-[min(52rem,calc(100vw-3rem))]"
+                className="z-40 max-h-[min(36rem,calc(100vh-5.5rem))] overflow-y-auto rounded-2xl border border-line bg-white p-5 shadow-card max-lg:fixed max-lg:inset-x-4 max-lg:top-16 lg:absolute lg:right-0 lg:top-12 lg:w-[min(56rem,calc(100vw-3rem))]"
                 role="menu"
               >
                 <MoreMenu onNavigate={() => setMoreOpen(false)} />
