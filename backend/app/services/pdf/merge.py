@@ -32,7 +32,7 @@ def merge_pdfs(files: list[SavedFile], directory: Path) -> ProcessResult:
         raise ProcessingFailedError() from exc
     return ProcessResult(
         path=destination,
-        download_name="convarter-merged.pdf",
+        download_name="bestconvert-merged.pdf",
         media_type="application/pdf",
         meta={"page_count": page_count, "file_count": len(files), "output_kind": "pdf"},
     )

@@ -58,7 +58,7 @@ export const tools: ToolDefinition[] = [
     processingLabel: "Merging PDFs…",
     endpoint: "/api/v1/tools/merge",
     featured: true,
-    seoTitle: "Merge PDF Online Free — Converter",
+    seoTitle: "Merge PDF Online Free — BestConvert",
     seoDescription: "Merge PDF files online into one document. Set the page order, then download the combined PDF. Files are removed after the download expires.",
   },
   {
@@ -82,7 +82,7 @@ export const tools: ToolDefinition[] = [
     processingLabel: "Splitting PDF…",
     endpoint: "/api/v1/tools/split",
     featured: true,
-    seoTitle: "Split PDF Online Free — Converter",
+    seoTitle: "Split PDF Online Free — BestConvert",
     seoDescription: "Split a PDF online by page ranges, into single pages, or every few pages. Download one PDF or a ZIP of the parts.",
   },
   {
@@ -106,7 +106,7 @@ export const tools: ToolDefinition[] = [
     processingLabel: "Compressing PDF…",
     endpoint: "/api/v1/tools/compress",
     featured: true,
-    seoTitle: "Compress PDF Online Free — Converter",
+    seoTitle: "Compress PDF Online Free — BestConvert",
     seoDescription: "Compress a PDF online to a smaller file. Photos shrink the most. A text-only PDF may change very little. Download the result when it is ready.",
   },
   {
@@ -129,7 +129,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Rotate PDF",
     processingLabel: "Rotating PDF…",
     endpoint: "/api/v1/tools/rotate",
-    seoTitle: "Rotate PDF Pages Online — Converter",
+    seoTitle: "Rotate PDF Pages Online — BestConvert",
     seoDescription: "Rotate PDF pages online by 90, 180, or 270 degrees clockwise. Turn every page, or only the page numbers you list.",
   },
   {
@@ -152,7 +152,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to JPG",
     processingLabel: "Converting to JPG…",
     endpoint: "/api/v1/tools/pdf-to-jpg",
-    seoTitle: "PDF to JPG Converter Online — Converter",
+    seoTitle: "PDF to JPG Converter Online — BestConvert",
     seoDescription: "Convert PDF pages to JPG images online. Choose screen, standard, or high resolution. One image downloads directly. Several pages arrive in a ZIP.",
   },
   {
@@ -175,7 +175,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Create PDF",
     processingLabel: "Creating PDF…",
     endpoint: "/api/v1/tools/jpg-to-pdf",
-    seoTitle: "JPG to PDF Converter Online — Converter",
+    seoTitle: "JPG to PDF Converter Online — BestConvert",
     seoDescription: "Convert JPG and JPEG images to one PDF online. Reorder the pictures and fit each image, or place them on A4 or Letter pages.",
   },
   {
@@ -198,7 +198,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to Word",
     processingLabel: "Converting to Word…",
     endpoint: "/api/v1/tools/pdf-to-word",
-    seoTitle: "PDF to Word Converter Online — Converter",
+    seoTitle: "PDF to Word Converter Online — BestConvert",
     seoDescription: "Convert a PDF to an editable Word document online. Text, tables, and images are copied across. Complex layouts may not match the PDF exactly.",
   },
   {
@@ -221,7 +221,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/word-to-pdf",
-    seoTitle: "Word to PDF Converter Online — Converter",
+    seoTitle: "Word to PDF Converter Online — BestConvert",
     seoDescription: "Convert a DOC or DOCX file to PDF online. The file type is checked from its contents. A missing font may be substituted.",
   },
   {
@@ -244,7 +244,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to Excel",
     processingLabel: "Converting to Excel…",
     endpoint: "/api/v1/tools/pdf-to-excel",
-    seoTitle: "PDF to Excel Converter Online — Converter",
+    seoTitle: "PDF to Excel Converter Online — BestConvert",
     seoDescription: "Convert PDF tables to an Excel workbook online. Each detected table becomes a sheet. Scanned pages without selectable text cannot be converted.",
   },
   {
@@ -267,7 +267,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/excel-to-pdf",
-    seoTitle: "Excel to PDF Converter Online — Converter",
+    seoTitle: "Excel to PDF Converter Online — BestConvert",
     seoDescription: "Convert an XLS or XLSX spreadsheet to PDF online. The file type is checked from its contents. A missing font may be substituted.",
   },
   {
@@ -290,7 +290,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PowerPoint",
     processingLabel: "Converting to PowerPoint…",
     endpoint: "/api/v1/tools/pdf-to-powerpoint",
-    seoTitle: "PDF to PowerPoint Converter — Converter",
+    seoTitle: "PDF to PowerPoint Converter — BestConvert",
     seoDescription: "Convert PDF pages to PowerPoint slides online. Use editable text where the page has selectable text, or keep each page as a slide image.",
   },
   {
@@ -313,7 +313,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/powerpoint-to-pdf",
-    seoTitle: "PowerPoint to PDF Converter — Converter",
+    seoTitle: "PowerPoint to PDF Converter — BestConvert",
     seoDescription: "Convert a PPT or PPTX slide deck to PDF online. The file type is checked from its contents. A missing font may be substituted.",
   },
   {
@@ -336,7 +336,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF",
     processingLabel: "Converting to PDF…",
     endpoint: "/api/v1/tools/html-to-pdf",
-    seoTitle: "HTML to PDF Converter Online — Converter",
+    seoTitle: "HTML to PDF Converter Online — BestConvert",
     seoDescription: "Convert an HTML file or a public web page to PDF online. Private and local addresses are blocked. Uploaded HTML is rendered without scripts.",
   },
   {
@@ -359,7 +359,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Convert to PDF/A",
     processingLabel: "Converting to PDF/A…",
     endpoint: "/api/v1/tools/pdf-to-pdfa",
-    seoTitle: "PDF to PDF/A Converter Online — Converter",
+    seoTitle: "PDF to PDF/A Converter Online — BestConvert",
     seoDescription: "Convert a PDF to PDF/A-1b, PDF/A-2b, or PDF/A-3b online. Archive markers are checked before download. This is not a full ISO certification.",
   },
   {
@@ -382,7 +382,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Save edited PDF",
     processingLabel: "Saving PDF edits…",
     endpoint: "/api/v1/tools/edit",
-    seoTitle: "Edit PDF Online Free — Converter",
+    seoTitle: "Edit PDF Online Free — BestConvert",
     seoDescription: "Edit a PDF online by adding text, images, highlights, or updating selectable text blocks. Preview pages and download the updated PDF.",
   },
   {
@@ -405,7 +405,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Add Watermark",
     processingLabel: "Adding watermark…",
     endpoint: "/api/v1/tools/watermark",
-    seoTitle: "Watermark PDF Online Free — Converter",
+    seoTitle: "Watermark PDF Online Free — BestConvert",
     seoDescription: "Add text or image watermarks to a PDF online. Control opacity, rotation, position, color, and page ranges before downloading.",
   },
   {
@@ -428,7 +428,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Add Page Numbers",
     processingLabel: "Adding page numbers…",
     endpoint: "/api/v1/tools/page-numbers",
-    seoTitle: "Add Page Numbers to PDF Online — Converter",
+    seoTitle: "Add Page Numbers to PDF Online — BestConvert",
     seoDescription: "Add customizable page numbers to a PDF online. Choose position, numbering format, font, size, color, and starting number.",
   },
   {
@@ -451,7 +451,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Repair PDF",
     processingLabel: "Repairing PDF…",
     endpoint: "/api/v1/tools/repair",
-    seoTitle: "Repair Damaged PDF Online Free — Converter",
+    seoTitle: "Repair Damaged PDF Online Free — BestConvert",
     seoDescription: "Repair a damaged or corrupted PDF online by rebuilding cross-reference tables and streams. Download the recovered file when validation passes.",
   },
   {
@@ -474,7 +474,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Run OCR",
     processingLabel: "Running OCR…",
     endpoint: "/api/v1/tools/ocr",
-    seoTitle: "OCR PDF Online Free — Make PDFs Searchable — Converter",
+    seoTitle: "OCR PDF Online Free — Make PDFs Searchable — BestConvert",
     seoDescription: "Convert scanned PDFs into searchable PDFs online using Tesseract OCR. Choose language, resolution, and page range while keeping page layout.",
   },
   {
@@ -497,7 +497,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Protect PDF",
     processingLabel: "Encrypting PDF…",
     endpoint: "/api/v1/tools/protect",
-    seoTitle: "Protect PDF with Password Online — Converter",
+    seoTitle: "Protect PDF with Password Online — BestConvert",
     seoDescription: "Add AES-256 password protection and permission controls to a PDF online. Verify encryption before downloading the protected document.",
   },
   {
@@ -520,7 +520,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Unlock PDF",
     processingLabel: "Unlocking PDF…",
     endpoint: "/api/v1/tools/unlock",
-    seoTitle: "Unlock PDF Online — Remove Known Password — Converter",
+    seoTitle: "Unlock PDF Online — Remove Known Password — BestConvert",
     seoDescription: "Remove a known password from an authorized PDF online. Enter the current password to save an unencrypted copy.",
   },
   {
@@ -543,7 +543,7 @@ export const tools: ToolDefinition[] = [
     actionLabel: "Sign PDF",
     processingLabel: "Applying signature…",
     endpoint: "/api/v1/tools/sign",
-    seoTitle: "Sign PDF Online Free — Visual Signature — Converter",
+    seoTitle: "Sign PDF Online Free — Visual Signature — BestConvert",
     seoDescription: "Draw or upload a visual signature and place it onto PDF pages online. Resize, position, and download your signed document.",
   },
 ];

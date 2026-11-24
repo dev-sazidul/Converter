@@ -48,7 +48,7 @@ def jpg_to_pdf(
         document.close()
     return ProcessResult(
         path=destination,
-        download_name="convarter-images.pdf",
+        download_name="bestconvert-images.pdf",
         media_type="application/pdf",
         meta={
             "page_count": len(files),

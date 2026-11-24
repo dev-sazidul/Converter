@@ -63,8 +63,8 @@ def split_pdf(
         output, download_name, media_type = finalize_outputs(
             directory,
             entries,
-            single_name="convarter-split.pdf",
-            zip_name="convarter-split.zip",
+            single_name="bestconvert-split.pdf",
+            zip_name="bestconvert-split.zip",
             single_type="application/pdf",
         )
     except AppError:

@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const post = getBlogBySlug(slug);
   if (!post) {
-    return pageMetadata("Blog Post Not Found — Converter", "The requested blog post does not exist.", `/blog/${slug}`, false);
+    return pageMetadata("Blog Post Not Found — BestConvert", "The requested blog post does not exist.", `/blog/${slug}`, false);
   }
   return pageMetadata(post.seoTitle, post.seoDescription, `/blog/${post.slug}`, true);
 }

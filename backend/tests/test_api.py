@@ -72,7 +72,7 @@ def test_merge_preserves_order_and_download(client):
     )
     assert response.status_code == 200, response.text
     body = response.json()
-    assert body["filename"] == "convarter-merged.pdf"
+    assert body["filename"] == "bestconvert-merged.pdf"
     assert body["meta"]["page_count"] == 2
     assert body["meta"]["output_kind"] == "pdf"
     assert "Users" not in response.text
@@ -82,7 +82,7 @@ def test_merge_preserves_order_and_download(client):
     assert download.status_code == 200
     assert download.content.startswith(b"%PDF")
     assert "attachment" in download.headers["content-disposition"]
-    assert "convarter-merged.pdf" in download.headers["content-disposition"]
+    assert "bestconvert-merged.pdf" in download.headers["content-disposition"]
     document = pymupdf.open(stream=download.content, filetype="pdf")
     assert document.page_count == 2
     assert "ALPHA" in document[0].get_text()

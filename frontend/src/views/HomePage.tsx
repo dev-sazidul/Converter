@@ -5,6 +5,29 @@ import { ToolBrowser } from "@/components/tools/ToolBrowser";
 import { EcosystemTools } from "@/components/layout/EcosystemTools";
 import { container, focusRing } from "@/lib/utils";
 
+const guides = [
+  {
+    slug: "/blog/compress-pdf-under-100kb-200kb",
+    title: "How to Compress PDFs Under 100KB or 200KB",
+    summary: "Practical steps for meeting strict upload caps on job, university, and government portals.",
+  },
+  {
+    slug: "/blog/convert-pdf-tables-to-excel-cleanly",
+    title: "Convert PDF Tables to Excel Cleanly",
+    summary: "Extract rows and columns from digital PDFs into XLSX without broken alignment.",
+  },
+  {
+    slug: "/blog/pdf-vs-pdfa-long-term-archiving-guide",
+    title: "PDF vs PDF/A for Long-Term Archiving",
+    summary: "Understand font embedding, color profiles, and when archives require PDF/A-1b, 2b, or 3b.",
+  },
+  {
+    slug: "/blog/how-to-split-pdf-extract-pages-securely",
+    title: "Split PDFs & Extract Only the Pages You Need",
+    summary: "Share specific ranges instead of sending an entire multi-page document.",
+  },
+];
+
 export function HomePage() {
   return (
     <div>
@@ -15,42 +38,82 @@ export function HomePage() {
             Every PDF task, clearly done.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted sm:text-lg">
-            Merge, split, compress, rotate, and convert documents without an account. Your files are processed for this task and then deleted.
+            Merge, split, compress, edit, OCR, sign, protect, and convert documents without an account. Your files are processed for the task and then deleted.
           </p>
           <ul className="mx-auto mt-8 flex max-w-3xl flex-col items-center justify-center gap-3 text-sm text-ink sm:flex-row sm:gap-8">
             <li className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" /> Files deleted automatically</li>
-            <li className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" aria-hidden="true" /> Usually ready in seconds</li>
+            <li className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" aria-hidden="true" /> Fast server processing</li>
             <li className="inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" /> No account required</li>
           </ul>
           <AdSlot slot="home" format="rectangle" className="mt-10" />
           <ToolBrowser embedded />
         </div>
       </section>
+
       <section className={`${container} py-12 sm:py-16`}>
-        <div className="mx-auto max-w-3xl">
-          <h2 className="text-2xl font-semibold tracking-tight text-ink">A free PDF converter for everyday files</h2>
-          <p className="mt-3 text-sm leading-6 text-muted">
-            Converter on bestconvert.site merges, splits, compresses, and rotates PDFs, and converts between PDF, Word, Excel, PowerPoint, JPG, HTML, and PDF/A. There is no account. A finished file stays available only until the download expires.
-          </p>
-          <h3 className="mt-8 text-lg font-semibold text-ink">Organize a PDF</h3>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            <Link to="/merge-pdf" className={link}>Merge PDF</Link> joins files in the order you choose. <Link to="/split-pdf" className={link}>Split PDF</Link> pulls out page ranges or saves each page. <Link to="/rotate-pdf" className={link}>Rotate PDF</Link> turns selected pages clockwise.
-          </p>
-          <h3 className="mt-8 text-lg font-semibold text-ink">Make a file smaller</h3>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            <Link to="/compress-pdf" className={link}>Compress PDF</Link> shrinks photos and scanned images the most. A PDF that is already small text may stay about the same size, and the result page says so.
-          </p>
-          <h3 className="mt-8 text-lg font-semibold text-ink">Convert to and from PDF</h3>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Save office files with <Link to="/word-to-pdf" className={link}>Word to PDF</Link>, <Link to="/excel-to-pdf" className={link}>Excel to PDF</Link>, and <Link to="/powerpoint-to-pdf" className={link}>PowerPoint to PDF</Link>. Go the other way with <Link to="/pdf-to-word" className={link}>PDF to Word</Link>, <Link to="/pdf-to-excel" className={link}>PDF to Excel</Link>, and <Link to="/pdf-to-powerpoint" className={link}>PDF to PowerPoint</Link>. Complex layouts can change, and scanned pages are not read because OCR is not available.
-          </p>
-          <p className="mt-3 text-sm leading-6 text-muted">
-            <Link to="/pdf-to-jpg" className={link}>PDF to JPG</Link> makes an image of each page, and <Link to="/jpg-to-pdf" className={link}>JPG to PDF</Link> accepts only JPG or JPEG. <Link to="/html-to-pdf" className={link}>HTML to PDF</Link> uses an HTML file or a public web page. <Link to="/pdf-to-pdfa" className={link}>PDF to PDF/A</Link> writes an archive copy and checks the markers. That check is not a full ISO certification.
-          </p>
-          <p className="mt-6 text-sm leading-6 text-muted">
-            Browse the full list on <Link to="/tools" className={link}>all PDF tools</Link>, open the <Link to="/convert-pdf" className={link}>convert PDF</Link> page, or read our latest workflow guides on the <Link to="/blog" className={link}>PDF Blog</Link>.
-          </p>
+        <div className="mx-auto max-w-3xl space-y-10">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight text-ink">
+              A complete PDF toolkit on bestconvert.site
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              BestConvert brings 22 focused document tools together in one interface without sign-up walls or watermarks. Every upload is checked from its actual file contents rather than just its filename extension, processed in an isolated temporary job folder, and removed automatically after your download expires.
+            </p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="rounded-2xl border border-line bg-white p-5">
+              <h3 className="text-base font-semibold text-ink">Organize &amp; Edit Pages</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Combine documents with <Link to="/merge-pdf" className={link}>Merge PDF</Link>, extract specific ranges with <Link to="/split-pdf" className={link}>Split PDF</Link>, or fix sideways scans with <Link to="/rotate-pdf" className={link}>Rotate PDF</Link>. Add text, highlights, or images using <Link to="/edit-pdf" className={link}>Edit PDF</Link>, stamp <Link to="/watermark-pdf" className={link}>Watermarks</Link>, or insert <Link to="/page-numbers" className={link}>Page numbers</Link>.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-line bg-white p-5">
+              <h3 className="text-base font-semibold text-ink">Optimize, OCR &amp; Repair</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Shrink photo-heavy documents with <Link to="/compress-pdf" className={link}>Compress PDF</Link> to meet portal size limits. Make scanned pages searchable with <Link to="/ocr-pdf" className={link}>OCR PDF</Link>, or attempt structural recovery on damaged files with <Link to="/repair-pdf" className={link}>Repair PDF</Link>.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-line bg-white p-5">
+              <h3 className="text-base font-semibold text-ink">Convert to &amp; from PDF</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Turn <Link to="/word-to-pdf" className={link}>Word</Link>, <Link to="/excel-to-pdf" className={link}>Excel</Link>, <Link to="/powerpoint-to-pdf" className={link}>PowerPoint</Link>, <Link to="/jpg-to-pdf" className={link}>JPG</Link>, and <Link to="/html-to-pdf" className={link}>HTML</Link> into PDFs, or export PDFs to <Link to="/pdf-to-word" className={link}>Word</Link>, <Link to="/pdf-to-excel" className={link}>Excel</Link>, <Link to="/pdf-to-powerpoint" className={link}>PowerPoint</Link>, <Link to="/pdf-to-jpg" className={link}>JPG</Link>, and <Link to="/pdf-to-pdfa" className={link}>PDF/A</Link>.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-line bg-white p-5">
+              <h3 className="text-base font-semibold text-ink">Protect, Unlock &amp; Sign</h3>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Encrypt sensitive files with AES-256 using <Link to="/protect-pdf" className={link}>Protect PDF</Link>, remove a known password from authorized files with <Link to="/unlock-pdf" className={link}>Unlock PDF</Link>, or place a visual signature with <Link to="/sign-pdf" className={link}>Sign PDF</Link>.
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold text-ink">Practical Workflow Guides</h2>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Learn how to get cleaner results before and after converting documents, or visit <Link to="/help" className={link}>Help &amp; Limits</Link> for file rules.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {guides.map((guide) => (
+                <Link
+                  key={guide.slug}
+                  to={guide.slug}
+                  className={`block rounded-2xl border border-line bg-white p-4 transition hover:border-primary/40 ${focusRing}`}
+                >
+                  <h3 className="text-sm font-semibold text-ink">{guide.title}</h3>
+                  <p className="mt-1 text-xs leading-5 text-muted">{guide.summary}</p>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-4 text-sm text-muted">
+              Explore all 22 utilities on <Link to="/tools" className={link}>All PDF tools</Link>, jump to format conversion on <Link to="/convert-pdf" className={link}>Convert PDF</Link>, or read every guide on the <Link to="/blog" className={link}>PDF Blog</Link>.
+            </p>
+          </div>
         </div>
+
         <div className="mt-14 max-w-4xl mx-auto">
           <EcosystemTools />
         </div>

@@ -16,6 +16,9 @@ describe("page metadata", () => {
     expect(head).toContain("<title>Home — Converter</title>");
     expect(head).toContain('rel="canonical" href="https://convarter.example/"');
     expect(head).toContain("og:description");
+    expect(head).toContain('property="og:image" content="https://convarter.example/og-image.png"');
+    expect(head).toContain('name="twitter:card" content="summary_large_image"');
+    expect(head).toContain('name="twitter:image" content="https://convarter.example/og-image.png"');
     expect(head).toContain("WebSite");
   });
 

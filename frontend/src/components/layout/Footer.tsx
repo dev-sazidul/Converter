@@ -10,7 +10,7 @@ export function Footer() {
       <AdSlot slot="footer" className={`${container} pt-8`} />
       <div className={cnGrid()}>
         <div>
-          <p className="text-base font-semibold text-ink">Converter</p>
+          <p className="text-base font-semibold text-ink">BestConvert</p>
           <p className="mt-2 max-w-xs text-sm leading-6 text-muted">
             PDF tools for everyday work. Documents are processed for the task and then deleted.
           </p>
@@ -25,12 +25,12 @@ export function Footer() {
             </a>
           </div>
         </div>
-        <div>
+        <div className="lg:col-span-2">
           <h2 className="text-sm font-semibold text-ink">Tools</h2>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
             {availableTools().map((tool) => (
               <li key={tool.slug}>
-                <Link className={`text-sm text-muted hover:text-primary ${focusRing} rounded-sm`} to={`/${tool.slug}`}>
+                <Link className={`text-sm text-muted hover:text-primary ${focusRing} rounded-sm whitespace-nowrap`} to={`/${tool.slug}`}>
                   {tool.name}
                 </Link>
               </li>
@@ -93,7 +93,7 @@ export function Footer() {
       </div>
       <div className="border-t border-line">
         <p className={`${container} py-4 text-xs text-muted flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}>
-          <span>© {new Date().getFullYear()} Converter. A Product of <a href="https://futuresolutionai.com" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:text-primary underline">FutureSolutionAI</a>. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} BestConvert. A Product of <a href="https://futuresolutionai.com" target="_blank" rel="noopener noreferrer" className="font-medium text-ink hover:text-primary underline">FutureSolutionAI</a>. All rights reserved.</span>
           <span>Files stay on the server only until the download expires.</span>
         </p>
       </div>
@@ -110,5 +110,5 @@ function FooterLink({ to, children }: { to: string; children: string }) {
 }
 
 function cnGrid() {
-  return `${container} grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-4`;
+  return `${container} grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-5`;
 }

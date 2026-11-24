@@ -36,8 +36,8 @@ def pdf_to_jpg(source: SavedFile, directory: Path, *, dpi: int, pages: str) -> P
         output, download_name, media_type = finalize_outputs(
             directory,
             entries,
-            single_name="convarter-page.jpg",
-            zip_name="convarter-pages.zip",
+            single_name="bestconvert-page.jpg",
+            zip_name="bestconvert-pages.zip",
             single_type="image/jpeg",
         )
     except AppError:

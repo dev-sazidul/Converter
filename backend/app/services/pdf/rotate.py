@@ -36,8 +36,8 @@ def rotate_pdfs(files: list[SavedFile], directory: Path, *, angle: int, pages: s
         output, download_name, media_type = finalize_outputs(
             directory,
             entries,
-            single_name="convarter-rotated.pdf",
-            zip_name="convarter-rotated.zip",
+            single_name="bestconvert-rotated.pdf",
+            zip_name="bestconvert-rotated.zip",
             single_type="application/pdf",
         )
     except AppError:

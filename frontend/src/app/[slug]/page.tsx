@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const tool = getTool(slug);
   if (!tool) {
-    return pageMetadata("Page not found — Converter", "That page doesn't exist on Converter.", `/${slug}`, false);
+    return pageMetadata("Page not found — BestConvert", "That page doesn't exist on BestConvert.", `/${slug}`, false);
   }
   return pageMetadata(tool.seoTitle, tool.seoDescription, `/${tool.slug}`, tool.status === "available");
 }

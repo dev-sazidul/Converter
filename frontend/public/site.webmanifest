@@ -1,6 +1,6 @@
 {
-  "name": "Converter",
-  "short_name": "Converter",
+  "name": "BestConvert",
+  "short_name": "BestConvert",
   "description": "Merge, split, compress, rotate, and convert PDFs.",
   "start_url": "/",
   "display": "standalone",

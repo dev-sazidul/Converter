@@ -2,8 +2,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { TermsPage } from "@/views/TermsPage";
 import { pageMetadata } from "@/lib/metadata";
 
-const title = "Terms of Use — Converter";
-const description = "Terms for using Converter's free PDF tools, including what you may upload and how results are provided.";
+const title = "Terms of Use — BestConvert";
+const description = "Terms for using BestConvert's free PDF tools, including what you may upload and how results are provided.";
 
 export const metadata = pageMetadata(title, description, "/terms");
 

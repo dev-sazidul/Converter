@@ -42,8 +42,8 @@ def compress_pdfs(files: list[SavedFile], directory: Path, *, quality: str) -> P
         output, download_name, media_type = finalize_outputs(
             directory,
             entries,
-            single_name="convarter-compressed.pdf",
-            zip_name="convarter-compressed.zip",
+            single_name="bestconvert-compressed.pdf",
+            zip_name="bestconvert-compressed.zip",
             single_type="application/pdf",
         )
     except AppError:

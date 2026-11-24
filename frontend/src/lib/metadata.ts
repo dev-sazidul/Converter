@@ -4,7 +4,12 @@ export function siteOrigin(): string {
   return (process.env.SITE_URL || "https://bestconvert.site").replace(/\/$/, "");
 }
 
+export function ogImageUrl(): string {
+  return `${siteOrigin()}/og-image.png`;
+}
+
 export function pageMetadata(title: string, description: string, path: string, index = true): Metadata {
+  const image = ogImageUrl();
   return {
     title,
     description,
@@ -14,10 +19,23 @@ export function pageMetadata(title: string, description: string, path: string, i
       title,
       description,
       url: path,
-      siteName: "Converter",
+      siteName: "BestConvert",
       type: "website",
       locale: "en_US",
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: "BestConvert — Free Online PDF Tools",
+        },
+      ],
     },
-    twitter: { card: "summary", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
   };
 }

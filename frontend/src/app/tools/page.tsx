@@ -2,8 +2,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { AllToolsPage } from "@/views/AllToolsPage";
 import { pageMetadata } from "@/lib/metadata";
 
-const title = "All Free PDF Tools — Converter";
-const description = "Browse free PDF tools to merge, split, compress, rotate, and convert documents. Coming soon tools are labeled and do not process files.";
+const title = "All Free PDF Tools — BestConvert";
+const description = "Browse 22 free online PDF tools to merge, split, compress, edit, OCR, repair, sign, protect, unlock, and convert documents without an account.";
 
 export const metadata = pageMetadata(title, description, "/tools");
 

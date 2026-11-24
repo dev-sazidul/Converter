@@ -26,7 +26,7 @@ const ecosystemSameAs = [
 function organizationNode(origin: string) {
   return {
     "@type": "Organization",
-    name: "Converter",
+    name: "BestConvert",
     url: origin,
     sameAs: ecosystemSameAs,
     parentOrganization: parentOrganizationNode,
@@ -143,7 +143,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
           name: head.title,
           description: head.description,
           url,
-          isPartOf: { "@type": "WebSite", name: "Converter", url: origin },
+          isPartOf: { "@type": "WebSite", name: "BestConvert", url: origin },
           publisher: org,
         },
         breadcrumb(origin, [
@@ -159,7 +159,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
     return {
       "@context": "https://schema.org",
       "@graph": [
-        { "@type": "WebSite", name: "Converter", url: origin, description: head.description },
+        { "@type": "WebSite", name: "BestConvert", url: origin, description: head.description },
         org,
       ],
     };
@@ -174,7 +174,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
           name: head.title,
           description: head.description,
           url,
-          isPartOf: { "@type": "WebSite", name: "Converter", url: origin },
+          isPartOf: { "@type": "WebSite", name: "BestConvert", url: origin },
           publisher: org,
         },
         breadcrumb(origin, [
@@ -223,7 +223,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
     name: head.title,
     description: head.description,
     url,
-    isPartOf: { "@type": "WebSite", name: "Converter", url: origin },
+    isPartOf: { "@type": "WebSite", name: "BestConvert", url: origin },
     publisher: org,
   };
 
@@ -236,6 +236,7 @@ export function structuredData(head: PageHead, origin: string): unknown {
 
 export function buildHeadTags(head: PageHead, origin: string): string {
   const url = absolute(origin, head.path);
+  const image = absolute(origin, "/og-image.png");
   const robots = isIndexable(head.path) ? "index, follow" : "noindex, follow";
   const json = JSON.stringify(structuredData(head, origin)).replaceAll("<", "\\u003c");
   return [
@@ -243,15 +244,19 @@ export function buildHeadTags(head: PageHead, origin: string): string {
     `<meta name="description" content="${escapeHtml(head.description)}" />`,
     `<link rel="canonical" href="${escapeHtml(url)}" />`,
     `<meta name="robots" content="${robots}" />`,
-    `<meta property="og:site_name" content="Converter" />`,
+    `<meta property="og:site_name" content="BestConvert" />`,
     `<meta property="og:type" content="website" />`,
     `<meta property="og:locale" content="en_US" />`,
     `<meta property="og:title" content="${escapeHtml(head.title)}" />`,
     `<meta property="og:description" content="${escapeHtml(head.description)}" />`,
     `<meta property="og:url" content="${escapeHtml(url)}" />`,
-    `<meta name="twitter:card" content="summary" />`,
+    `<meta property="og:image" content="${escapeHtml(image)}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escapeHtml(head.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(head.description)}" />`,
+    `<meta name="twitter:image" content="${escapeHtml(image)}" />`,
     `<script type="application/ld+json" id="structured-data">${json}</script>`,
   ].join("\n    ");
 }
