@@ -15,6 +15,7 @@ from app.errors import AppError, BusyError, EmptyUploadError, InvalidOptionError
 from app.schemas import JobResponse
 from app.services.convert.html_policy import normalize_public_url
 from app.services.convert.html_to_pdf import html_file_to_pdf, html_url_to_pdf
+from app.services.convert.ocr_pdf import ocr_pdf
 from app.services.convert.pdf_to_excel import pdf_to_excel
 from app.services.convert.pdf_to_pdfa import pdf_to_pdfa
 from app.services.convert.pdf_to_pptx import pdf_to_pptx
@@ -22,12 +23,20 @@ from app.services.convert.pdf_to_word import pdf_to_word
 from app.services.convert.libreoffice import convert_office_to_pdf
 from app.services.jobs import Job, JobStore, ProcessResult, SavedFile
 from app.services.pdf.compress import compress_pdfs
+from app.services.pdf.edit import edit_pdf
 from app.services.pdf.jpg_to_pdf import jpg_to_pdf
 from app.services.pdf.merge import merge_pdfs
+from app.services.pdf.page_numbers import add_page_numbers
 from app.services.pdf.pdf_to_jpg import pdf_to_jpg
+from app.services.pdf.preview import render_page_preview
+from app.services.pdf.protect import protect_pdf
 from app.services.pdf.ranges import parse_bool, parse_choice, parse_int
+from app.services.pdf.repair import repair_pdf
 from app.services.pdf.rotate import rotate_pdfs
+from app.services.pdf.sign import sign_pdf
 from app.services.pdf.split import split_pdf
+from app.services.pdf.unlock import unlock_pdf
+from app.services.pdf.watermark import add_watermark
 from app.services.uploads import collect_files
 from app.services.worker import run_tool
 
@@ -49,6 +58,14 @@ TOOL_CATALOG = [
     {"slug": "powerpoint-to-pdf", "method": "POST", "path": "/api/v1/tools/powerpoint-to-pdf"},
     {"slug": "html-to-pdf", "method": "POST", "path": "/api/v1/tools/html-to-pdf"},
     {"slug": "pdf-to-pdfa", "method": "POST", "path": "/api/v1/tools/pdf-to-pdfa"},
+    {"slug": "edit-pdf", "method": "POST", "path": "/api/v1/tools/edit"},
+    {"slug": "watermark-pdf", "method": "POST", "path": "/api/v1/tools/watermark"},
+    {"slug": "page-numbers", "method": "POST", "path": "/api/v1/tools/page-numbers"},
+    {"slug": "repair-pdf", "method": "POST", "path": "/api/v1/tools/repair"},
+    {"slug": "ocr-pdf", "method": "POST", "path": "/api/v1/tools/ocr"},
+    {"slug": "protect-pdf", "method": "POST", "path": "/api/v1/tools/protect"},
+    {"slug": "unlock-pdf", "method": "POST", "path": "/api/v1/tools/unlock"},
+    {"slug": "sign-pdf", "method": "POST", "path": "/api/v1/tools/sign"},
 ]
 
 
@@ -566,3 +583,374 @@ async def pdf_to_pdfa_tool(
         directory=job.directory,
         level=selected,
     )
+
+
+@router.post("/tools/protect", response_model=JobResponse)
+async def protect_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    user_password: str = Form(""),
+    owner_password: str = Form(""),
+    allow_print: str = Form("true"),
+    allow_copy: str = Form("true"),
+    allow_modify: str = Form("false"),
+) -> JobResponse:
+    uploads = as_uploads(files)
+    _one(uploads, "Protect one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="protect",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to protect.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        protect_pdf,
+        source=saved[0],
+        directory=job.directory,
+        user_password=user_password,
+        owner_password=owner_password,
+        allow_print=parse_bool(allow_print),
+        allow_copy=parse_bool(allow_copy),
+        allow_modify=parse_bool(allow_modify),
+    )
+
+
+@router.post("/tools/unlock", response_model=JobResponse)
+async def unlock_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    password: str = Form(""),
+    authorized: str = Form("false"),
+) -> JobResponse:
+    settings: Settings = request.app.state.settings
+    uploads = as_uploads(files)
+    _one(uploads, "Unlock one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="unlock",
+        kind="encrypted_pdf",
+        min_files=1,
+        min_message="Add a PDF to unlock.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        unlock_pdf,
+        source=saved[0],
+        directory=job.directory,
+        password=password,
+        authorized=parse_bool(authorized),
+        max_pages=settings.max_pages,
+    )
+
+
+@router.post("/tools/repair", response_model=JobResponse)
+async def repair_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+) -> JobResponse:
+    settings: Settings = request.app.state.settings
+    uploads = as_uploads(files)
+    _one(uploads, "Repair one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="repair",
+        kind="raw_pdf",
+        min_files=1,
+        min_message="Add a PDF to repair.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        repair_pdf,
+        source=saved[0],
+        directory=job.directory,
+        max_pages=settings.max_pages,
+    )
+
+
+@router.post("/tools/page-numbers", response_model=JobResponse)
+async def page_numbers_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    position: str = Form("bottom-center"),
+    format: str = Form("number"),
+    start_number: str = Form("1"),
+    font: str = Form("helv"),
+    font_size: str = Form("11"),
+    color: str = Form("#334155"),
+    pages: str = Form("all"),
+) -> JobResponse:
+    uploads = as_uploads(files)
+    _one(uploads, "Add page numbers to one PDF at a time.")
+    start_val = parse_int(start_number, label="Starting number", minimum=1, maximum=10000)
+    size_val = parse_int(font_size, label="Font size", minimum=8, maximum=36)
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="page-numbers",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to number.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        add_page_numbers,
+        source=saved[0],
+        directory=job.directory,
+        position=position.strip().lower(),
+        fmt=format.strip().lower(),
+        start_number=start_val,
+        font=font.strip().lower(),
+        font_size=size_val,
+        color=color,
+        pages=pages,
+    )
+
+
+@router.post("/tools/watermark", response_model=JobResponse)
+async def watermark_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    watermark_image: UploadFile | None = File(default=None),
+    mode: str = Form("text"),
+    text: str = Form(""),
+    font_size: str = Form("48"),
+    color: str = Form("#0C5F5A"),
+    opacity: str = Form("0.25"),
+    rotation: str = Form("-45"),
+    position: str = Form("center"),
+    pages: str = Form("all"),
+    scale: str = Form("0.35"),
+) -> JobResponse:
+    settings: Settings = request.app.state.settings
+    uploads = as_uploads(files)
+    _one(uploads, "Watermark one PDF at a time.")
+    selected_mode = parse_choice(mode, {"text", "image"}, "Choose a text or image watermark.")
+    size_val = parse_int(font_size, label="Font size", minimum=12, maximum=120)
+    rot_val = parse_int(rotation, label="Rotation", minimum=-90, maximum=90)
+    try:
+        opacity_val = float(opacity)
+    except (TypeError, ValueError) as exc:
+        raise InvalidOptionError("Opacity must be a number.") from exc
+    try:
+        scale_val = float(scale)
+    except (TypeError, ValueError) as exc:
+        raise InvalidOptionError("Scale must be a number.") from exc
+
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="watermark",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to watermark.",
+    )
+
+    extra_img: SavedFile | None = None
+    all_files = list(saved)
+    if selected_mode == "image":
+        if watermark_image is None:
+            request.app.state.store.discard(job)
+            raise InvalidOptionError("Upload a PNG or JPG watermark image.")
+        try:
+            img_saved = await collect_files(
+                [watermark_image],
+                settings,
+                job.directory / "wm",
+                kind="overlay_image",
+                min_files=1,
+                min_message="Upload a PNG or JPG watermark image.",
+            )
+            extra_img = img_saved[0]
+            all_files.extend(img_saved)
+        except Exception:
+            request.app.state.store.discard(job)
+            raise
+
+    return await _finish(
+        request,
+        job,
+        all_files,
+        add_watermark,
+        source=saved[0],
+        directory=job.directory,
+        mode=selected_mode,
+        text=text,
+        font_size=size_val,
+        color=color,
+        opacity=opacity_val,
+        rotation=rot_val,
+        position=position.strip().lower(),
+        pages=pages,
+        scale=scale_val,
+        image_file=extra_img,
+    )
+
+
+@router.post("/tools/ocr", response_model=JobResponse)
+async def ocr_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    language: str = Form("eng"),
+    dpi: str = Form("150"),
+    pages: str = Form("all"),
+) -> JobResponse:
+    settings: Settings = request.app.state.settings
+    uploads = as_uploads(files)
+    _one(uploads, "Run OCR on one PDF at a time.")
+    dpi_val = parse_int(dpi, label="Resolution", minimum=150, maximum=200)
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="ocr",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to run OCR.",
+    )
+    return await _finish(
+        request,
+        job,
+        saved,
+        ocr_pdf,
+        source=saved[0],
+        directory=job.directory,
+        language=language,
+        dpi=dpi_val,
+        pages=pages,
+        max_pixels=settings.max_image_pixels,
+    )
+
+
+@router.post("/tools/sign", response_model=JobResponse)
+async def sign_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    signature_image: UploadFile | None = File(default=None),
+    placements: str = Form("[]"),
+) -> JobResponse:
+    settings: Settings = request.app.state.settings
+    uploads = as_uploads(files)
+    _one(uploads, "Sign one PDF at a time.")
+    if signature_image is None:
+        raise InvalidOptionError("Draw or upload a signature image first.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="sign",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to sign.",
+    )
+    try:
+        sig_saved = await collect_files(
+            [signature_image],
+            settings,
+            job.directory / "sig",
+            kind="overlay_image",
+            min_files=1,
+            min_message="Draw or upload a signature image first.",
+        )
+    except Exception:
+        request.app.state.store.discard(job)
+        raise
+
+    return await _finish(
+        request,
+        job,
+        [*saved, *sig_saved],
+        sign_pdf,
+        source=saved[0],
+        signature_image=sig_saved[0],
+        directory=job.directory,
+        placements_json=placements,
+    )
+
+
+@router.post("/tools/edit", response_model=JobResponse)
+async def edit_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    images: list[UploadFile] | None = File(default=None),
+    operations: str = Form("[]"),
+) -> JobResponse:
+    settings: Settings = request.app.state.settings
+    uploads = as_uploads(files)
+    _one(uploads, "Edit one PDF at a time.")
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="edit",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to edit.",
+    )
+    img_uploads = as_uploads(images)
+    img_saved: list[SavedFile] = []
+    if img_uploads:
+        try:
+            img_saved = await collect_files(
+                img_uploads,
+                settings,
+                job.directory / "edit_images",
+                kind="overlay_image",
+                min_files=1,
+                min_message="Upload PNG or JPG images.",
+            )
+        except Exception:
+            request.app.state.store.discard(job)
+            raise
+
+    return await _finish(
+        request,
+        job,
+        [*saved, *img_saved],
+        edit_pdf,
+        source=saved[0],
+        directory=job.directory,
+        operations_json=operations,
+        image_files=img_saved,
+    )
+
+
+@router.post("/tools/preview")
+async def preview_tool(
+    request: Request,
+    files: list[UploadFile] | None = File(default=None),
+    page: str = Form("1"),
+    include_text: str = Form("false"),
+) -> dict[str, Any]:
+    settings: Settings = request.app.state.settings
+    uploads = as_uploads(files)
+    _one(uploads, "Preview one PDF at a time.")
+    page_num = parse_int(page, label="Page", minimum=1, maximum=settings.max_pages)
+    store: JobStore = request.app.state.store
+    job, saved = await _accept(
+        request,
+        uploads,
+        tool="preview",
+        kind="pdf",
+        min_files=1,
+        min_message="Add a PDF to preview.",
+    )
+    try:
+        return await asyncio.to_thread(
+            render_page_preview,
+            saved[0].path,
+            page_number=page_num,
+            max_pixels=settings.max_image_pixels,
+            include_text=parse_bool(include_text),
+        )
+    finally:
+        store.discard(job)

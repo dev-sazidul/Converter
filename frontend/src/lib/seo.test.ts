@@ -33,20 +33,16 @@ describe("page metadata", () => {
     expect(statusForPath("/contact")).toBe(200);
   });
 
-  it("lists indexable URLs and leaves coming soon tools out of the sitemap", () => {
+  it("lists indexable URLs including all 22 working tools", () => {
     const paths = publicPaths();
     expect(paths).toContain("/");
     expect(paths).toContain("/contact");
     expect(paths).toContain("/merge-pdf");
     expect(paths).toContain("/pdf-to-pdfa");
-    expect(paths).not.toContain("/sign-pdf");
-    expect(paths).not.toContain("/edit-pdf");
-    const soon = buildHeadTags(
-      { title: "Edit PDF — coming soon — Converter", description: "Not available.", path: "/edit-pdf" },
-      "https://convarter.example",
-    );
-    expect(soon).toContain("noindex, follow");
-    expect(soon).not.toContain("SoftwareApplication");
+    expect(paths).toContain("/sign-pdf");
+    expect(paths).toContain("/edit-pdf");
+    expect(paths).toContain("/ocr-pdf");
+    expect(paths).toContain("/protect-pdf");
   });
 
   it("gives every working tool a unique title, description, and matching FAQ", () => {

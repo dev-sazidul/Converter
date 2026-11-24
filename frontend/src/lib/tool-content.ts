@@ -388,6 +388,222 @@ export const toolContent: Record<string, ToolCopy> = {
     ],
     related: ["compress-pdf", "merge-pdf", "html-to-pdf"],
   },
+  "edit-pdf": {
+    heading: "Edit PDF online",
+    intro:
+      "Preview your PDF pages, add new text, images, and highlight boxes, or replace selectable text blocks directly on the page before downloading.",
+    steps: [
+      "Upload one PDF to load a page preview.",
+      "Add text, images, or highlights, or click a selectable text line to replace its wording.",
+      "Review your changes and save the edited PDF.",
+    ],
+    limits:
+      "Existing text can only be replaced where the PDF contains selectable text. Scanned pages (images) require OCR first, and replaced text uses standard PDF fonts rather than proprietary embedded fonts.",
+    faqs: [
+      {
+        question: "Can I edit existing text in any PDF?",
+        answer: "Selectable text lines can be replaced in place. Scanned PDFs or text converted to outlines cannot be edited as text without running OCR first.",
+      },
+      {
+        question: "Can I move, resize, and remove elements I add?",
+        answer: "Yes. Every text box, image, or highlight you add can be dragged, resized, and deleted before saving.",
+      },
+      {
+        question: "Will the original layout stay intact?",
+        answer: "Added elements are layered onto the page without reflowing surrounding paragraphs.",
+      },
+    ],
+    related: ["sign-pdf", "watermark-pdf", "ocr-pdf"],
+  },
+  "watermark-pdf": {
+    heading: "Watermark PDF online",
+    intro:
+      "Stamp a custom text or image watermark onto every page or selected pages of a PDF. Control opacity, rotation, position, size, and color.",
+    steps: [
+      "Upload the PDF you want to watermark.",
+      "Choose text or image mode and set opacity, rotation, position, and page range.",
+      "Apply the watermark and download the updated PDF.",
+    ],
+    limits:
+      "Image watermarks accept PNG, JPG, and JPEG files. Watermarks are layered onto the page and are not removable once flattened into the downloaded PDF.",
+    faqs: [
+      {
+        question: "Can I use my own logo as a watermark?",
+        answer: "Yes. Switch to Image mode and upload a PNG or JPG logo, then adjust its scale, opacity, and position.",
+      },
+      {
+        question: "Can I watermark only specific pages?",
+        answer: "Yes. Choose Custom range and enter pages such as 1, 3-5 to leave other pages untouched.",
+      },
+      {
+        question: "Can I tile a watermark across the entire page?",
+        answer: "Yes. Select the Tile position to repeat the watermark across the page.",
+      },
+    ],
+    related: ["page-numbers", "protect-pdf", "edit-pdf"],
+  },
+  "page-numbers": {
+    heading: "Add page numbers to PDF",
+    intro:
+      "Insert clean, consistent page numbers into a PDF with customizable position, numbering format, font, size, color, and starting number.",
+    steps: [
+      "Upload one PDF document.",
+      "Choose the position, format (such as 1, 1 / 5, or Page 1 of 5), font, size, and starting number.",
+      "Generate and download the numbered PDF.",
+    ],
+    limits:
+      "Page numbers are stamped at the chosen margin. Documents with very narrow margins may need a smaller font size.",
+    faqs: [
+      {
+        question: "Can I start numbering from a number other than 1?",
+        answer: "Yes. Set any starting number between 1 and 10,000, which is useful for appendices or multi-part reports.",
+      },
+      {
+        question: "Can I skip the cover page?",
+        answer: "Yes. Use Custom range (for example 2-10) so page 1 stays unnumbered.",
+      },
+      {
+        question: "Which numbering formats are supported?",
+        answer: "You can choose plain numbers (1), fraction style (1 / 5), Page 1, or Page 1 of 5.",
+      },
+    ],
+    related: ["merge-pdf", "split-pdf", "watermark-pdf"],
+  },
+  "repair-pdf": {
+    heading: "Repair PDF online",
+    intro:
+      "Recover damaged or malformed PDFs that fail to open cleanly. The tool attempts structural cross-reference rebuilding and Ghostscript re-distillation, returning a file only if validation passes.",
+    steps: [
+      "Upload the damaged PDF file.",
+      "Start the repair process to run structural recovery.",
+      "Download the repaired PDF if recovery succeeds.",
+    ],
+    limits:
+      "Severely truncated files with missing object streams or password-protected PDFs cannot be repaired automatically.",
+    faqs: [
+      {
+        question: "What kind of PDF damage can be repaired?",
+        answer: "Broken cross-reference tables, missing EOF markers, and minor stream corruption can often be recovered.",
+      },
+      {
+        question: "What happens if a PDF cannot be recovered?",
+        answer: "The tool reports that the file is unrecoverable rather than returning an empty or broken download.",
+      },
+      {
+        question: "Can it repair a password-protected PDF?",
+        answer: "No. Unlock the PDF first if you have the password, then run Repair PDF.",
+      },
+    ],
+    related: ["compress-pdf", "pdf-to-pdfa", "unlock-pdf"],
+  },
+  "ocr-pdf": {
+    heading: "OCR PDF online",
+    intro:
+      "Make scanned PDFs searchable by running local Tesseract optical character recognition (OCR) on each page while preserving the original page appearance.",
+    steps: [
+      "Upload a scanned PDF document.",
+      "Choose the document language, scan resolution (150 or 200 DPI), and pages to process.",
+      "Run OCR and download the searchable PDF.",
+    ],
+    limits:
+      "OCR accuracy depends on scan clarity and contrast. Handwritten notes or heavily skewed scans may have lower recognition accuracy.",
+    faqs: [
+      {
+        question: "Does OCR change how my scanned pages look?",
+        answer: "No. The original scanned page image is preserved with an invisible, selectable text layer aligned underneath.",
+      },
+      {
+        question: "Which languages are supported?",
+        answer: "English is always available, along with installed language packs such as Spanish, French, German, Italian, and Portuguese.",
+      },
+      {
+        question: "Can I run OCR on specific pages only?",
+        answer: "Yes. Enter a custom page range to OCR only the scanned pages in a mixed document.",
+      },
+    ],
+    related: ["pdf-to-word", "pdf-to-excel", "compress-pdf"],
+  },
+  "protect-pdf": {
+    heading: "Protect PDF with password",
+    intro:
+      "Secure a PDF with AES-256 encryption before sharing it. Set an open password and choose whether recipients can print, copy text, or modify the document.",
+    steps: [
+      "Upload one unencrypted PDF.",
+      "Enter a strong open password and choose permission settings.",
+      "Encrypt and download the protected PDF.",
+    ],
+    limits:
+      "Passwords are never stored or logged. If you forget the password you set, the file cannot be recovered.",
+    faqs: [
+      {
+        question: "What encryption standard is used?",
+        answer: "Files are encrypted with AES-256 and verified before the download link is created.",
+      },
+      {
+        question: "Are my passwords stored on the server?",
+        answer: "No. Passwords are used only in memory during encryption and are never saved or logged.",
+      },
+      {
+        question: "Can I restrict printing and copying?",
+        answer: "Yes. Use the permission toggles to allow or restrict printing, text copying, and modifications.",
+      },
+    ],
+    related: ["unlock-pdf", "sign-pdf", "watermark-pdf"],
+  },
+  "unlock-pdf": {
+    heading: "Unlock PDF online",
+    intro:
+      "Remove password protection from a PDF when you already know the password and have authorization to save an unencrypted copy.",
+    steps: [
+      "Upload the password-protected PDF.",
+      "Enter the current PDF password and confirm you are authorized to unlock it.",
+      "Download the unlocked PDF.",
+    ],
+    limits:
+      "This tool does not bypass, crack, or recover unknown passwords. You must provide the valid password.",
+    faqs: [
+      {
+        question: "Can this tool unlock a PDF if I forgot the password?",
+        answer: "No. Only PDFs where you supply the correct password can be unlocked.",
+      },
+      {
+        question: "Is my password saved anywhere?",
+        answer: "No. Your password is used once to decrypt the file and is never logged or stored.",
+      },
+      {
+        question: "Will the unlocked PDF keep all pages and formatting?",
+        answer: "Yes. All pages and content are preserved in an unencrypted copy.",
+      },
+    ],
+    related: ["protect-pdf", "merge-pdf", "split-pdf"],
+  },
+  "sign-pdf": {
+    heading: "Sign PDF online",
+    intro:
+      "Draw a signature on screen or upload a signature image, place and resize it on any page of your PDF, and download the signed document.",
+    steps: [
+      "Upload one PDF to preview its pages.",
+      "Draw your signature or upload a PNG/JPG signature image.",
+      "Place, move, and resize the signature on the page, then click Sign PDF.",
+    ],
+    limits:
+      "This tool adds a visual image-based signature to the PDF. It does not issue a cryptographic X.509 digital certificate.",
+    faqs: [
+      {
+        question: "Is this a visual signature or a cryptographic digital signature?",
+        answer: "It is a visual image signature stamped onto the PDF page, not a cryptographic certificate-based digital signature.",
+      },
+      {
+        question: "Can I sign multiple pages?",
+        answer: "Yes. Switch between pages in the preview and place your signature wherever needed.",
+      },
+      {
+        question: "Can I upload a transparent PNG signature?",
+        answer: "Yes. Both transparent PNGs and JPG images are supported, or you can draw directly on the pad.",
+      },
+    ],
+    related: ["edit-pdf", "protect-pdf", "watermark-pdf"],
+  },
 };
 
 export function getToolCopy(slug: string): ToolCopy | undefined {

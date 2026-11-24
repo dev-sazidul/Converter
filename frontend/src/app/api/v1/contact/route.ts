@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { validateContactInput } from "@/lib/contact";
 import { NO_STORE, apiError } from "@/lib/converter";
 import { getDb } from "@/lib/db";
+import { sendContactEmail } from "@/lib/mailer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -84,10 +85,19 @@ export async function POST(request: Request): Promise<Response> {
       },
     });
 
+    const mail = await sendContactEmail({
+      id: record.id,
+      name: validated.data.name,
+      email: validated.data.email,
+      subject: validated.data.subject,
+      message: validated.data.message,
+    });
+
     return Response.json(
       {
         ok: true,
         id: record.id,
+        emailed: mail.sent,
         message: "Thank you for contacting BestConvert. Your message has been received.",
       },
       { status: 201, headers: NO_STORE },

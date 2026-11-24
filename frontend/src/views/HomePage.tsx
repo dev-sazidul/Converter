@@ -48,7 +48,7 @@ export function HomePage() {
             <Link to="/pdf-to-jpg" className={link}>PDF to JPG</Link> makes an image of each page, and <Link to="/jpg-to-pdf" className={link}>JPG to PDF</Link> accepts only JPG or JPEG. <Link to="/html-to-pdf" className={link}>HTML to PDF</Link> uses an HTML file or a public web page. <Link to="/pdf-to-pdfa" className={link}>PDF to PDF/A</Link> writes an archive copy and checks the markers. That check is not a full ISO certification.
           </p>
           <p className="mt-6 text-sm leading-6 text-muted">
-            Browse the full list on <Link to="/tools" className={link}>all PDF tools</Link>, open the <Link to="/convert-pdf" className={link}>convert PDF</Link> page, or read our latest workflow guides on the <Link to="/blog" className={link}>PDF Blog</Link>. Tools marked Coming soon do not process files.
+            Browse the full list on <Link to="/tools" className={link}>all PDF tools</Link>, open the <Link to="/convert-pdf" className={link}>convert PDF</Link> page, or read our latest workflow guides on the <Link to="/blog" className={link}>PDF Blog</Link>.
           </p>
         </div>
         <div className="mt-14 max-w-4xl mx-auto">

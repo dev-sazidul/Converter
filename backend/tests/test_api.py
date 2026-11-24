@@ -33,7 +33,7 @@ def test_health_and_meta(client):
     assert meta.status_code == 200
     body = meta.json()
     assert body["name"] == "Converter"
-    assert len(body["tools"]) == 14
+    assert len(body["tools"]) == 22
     assert {item["slug"] for item in body["tools"]} == {
         "merge-pdf",
         "split-pdf",
@@ -49,6 +49,14 @@ def test_health_and_meta(client):
         "powerpoint-to-pdf",
         "html-to-pdf",
         "pdf-to-pdfa",
+        "edit-pdf",
+        "watermark-pdf",
+        "page-numbers",
+        "repair-pdf",
+        "ocr-pdf",
+        "protect-pdf",
+        "unlock-pdf",
+        "sign-pdf",
     }
     assert "/storage" not in meta.text
     assert "Traceback" not in meta.text

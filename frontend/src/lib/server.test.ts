@@ -69,11 +69,24 @@ describe("limitBody", () => {
 
 describe("converter helpers", () => {
   it("allows exactly the converter tools behind available tools", () => {
-    expect(converterTools.size).toBe(14);
-    for (const name of ["merge", "split", "pdf-to-jpg", "html-to-pdf", "pdf-to-pdfa"]) {
+    expect(converterTools.size).toBe(22);
+    for (const name of [
+      "merge",
+      "split",
+      "pdf-to-jpg",
+      "html-to-pdf",
+      "pdf-to-pdfa",
+      "edit",
+      "watermark",
+      "page-numbers",
+      "repair",
+      "ocr",
+      "protect",
+      "unlock",
+      "sign",
+    ]) {
       expect(converterTools.has(name)).toBe(true);
     }
-    expect(converterTools.has("edit-pdf")).toBe(false);
     expect(converterTools.has("..")).toBe(false);
   });
 

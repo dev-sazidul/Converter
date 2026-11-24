@@ -25,6 +25,13 @@ RUN apt-get update \
         libgl1 \
         libgomp1 \
         ghostscript \
+        tesseract-ocr \
+        tesseract-ocr-eng \
+        tesseract-ocr-spa \
+        tesseract-ocr-fra \
+        tesseract-ocr-deu \
+        tesseract-ocr-ita \
+        tesseract-ocr-por \
         fonts-liberation \
         fontconfig \
         libreoffice-writer \

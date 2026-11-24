@@ -5,8 +5,10 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { Link } from "@/components/ui/Link";
 import { useLimits } from "@/components/limits/LimitsProvider";
 import { Dropzone } from "@/components/upload/Dropzone";
+import { EditPdfWorkspace } from "@/components/upload/EditPdfWorkspace";
 import { FileQueue, type QueueItem } from "@/components/upload/FileQueue";
 import { ResultPanel } from "@/components/upload/ResultPanel";
+import { SignPdfWorkspace } from "@/components/upload/SignPdfWorkspace";
 import { ToolOptionsForm } from "@/components/upload/ToolOptionsForm";
 import { Button } from "@/components/ui/Button";
 import { ApiError, postForm, type JobResult } from "@/lib/api";
@@ -28,6 +30,16 @@ import { cn, focusRing } from "@/lib/utils";
 type Phase = "idle" | "ready" | "processing" | "success" | "error";
 
 export function ToolWorkspace({ tool }: { tool: ToolDefinition }) {
+  if (tool.slug === "sign-pdf") {
+    return <SignPdfWorkspace tool={tool} />;
+  }
+  if (tool.slug === "edit-pdf") {
+    return <EditPdfWorkspace tool={tool} />;
+  }
+  return <StandardToolWorkspace tool={tool} />;
+}
+
+function StandardToolWorkspace({ tool }: { tool: ToolDefinition }) {
   const limits = useLimits();
   const [items, setItems] = useState<QueueItem[]>([]);
   const [options, setOptions] = useState<ToolOptions>(defaultOptions);

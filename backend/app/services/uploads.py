@@ -81,7 +81,13 @@ async def write_limited(upload: UploadFile, dest: Path, max_bytes: int, label: s
     return size
 
 
-def inspect_pdf(path: Path, max_pages: int, label: str) -> int:
+def inspect_pdf(
+    path: Path,
+    max_pages: int,
+    label: str,
+    *,
+    allow_encrypted: bool = False,
+) -> int:
     if sniff(path) != "pdf":
         raise UnsupportedTypeError(f"“{label}” is not a PDF.")
     try:
@@ -90,10 +96,12 @@ def inspect_pdf(path: Path, max_pages: int, label: str) -> int:
         raise InvalidPdfError(f"“{label}” isn't a valid PDF. Export it again and retry.") from exc
     try:
         needs_password = bool(getattr(document, "needs_pass", 0))
-        if needs_password or (document.is_encrypted and document.page_count < 1):
+        if not allow_encrypted and (needs_password or (document.is_encrypted and document.page_count < 1)):
             raise EncryptedPdfError(
                 f"“{label}” is password-protected. Remove the password and try again."
             )
+        if allow_encrypted and needs_password:
+            return int(document.page_count)
         if document.page_count < 1:
             raise InvalidPdfError(f"“{label}” has no pages.")
         if document.page_count > max_pages:
@@ -110,10 +118,27 @@ def inspect_pdf(path: Path, max_pages: int, label: str) -> int:
         document.close()
 
 
-def inspect_image(path: Path, max_pixels: int, label: str) -> tuple[int, int]:
+def inspect_raw_pdf(path: Path, label: str) -> None:
+    """Basic header check for repair-pdf without rejecting damaged xref/pages."""
+    with path.open("rb") as handle:
+        head = handle.read(1024)
+    if b"%PDF" not in head:
+        raise UnsupportedTypeError(f"“{label}” is not a PDF.")
+
+
+def inspect_image(
+    path: Path,
+    max_pixels: int,
+    label: str,
+    *,
+    allowed_kinds: set[str] | None = None,
+) -> tuple[int, int]:
     kind = sniff(path)
-    if kind != "jpeg":
-        raise UnsupportedTypeError(f"“{label}” needs to be a JPG or JPEG image.")
+    allowed = allowed_kinds or {"jpeg"}
+    if kind not in allowed:
+        if allowed == {"jpeg"}:
+            raise UnsupportedTypeError(f"“{label}” needs to be a JPG or JPEG image.")
+        raise UnsupportedTypeError(f"“{label}” needs to be a PNG or JPG image.")
     Image.MAX_IMAGE_PIXELS = max_pixels
     try:
         with Image.open(path) as image:
@@ -163,8 +188,25 @@ async def collect_files(
         if kind == "pdf":
             pages = await asyncio.to_thread(inspect_pdf, target, settings.max_pages, label)
             saved.append(SavedFile(target, label, size, pages))
+        elif kind == "encrypted_pdf":
+            pages = await asyncio.to_thread(
+                inspect_pdf, target, settings.max_pages, label, allow_encrypted=True
+            )
+            saved.append(SavedFile(target, label, size, pages))
+        elif kind == "raw_pdf":
+            await asyncio.to_thread(inspect_raw_pdf, target, label)
+            saved.append(SavedFile(target, label, size, None))
         elif kind == "image":
             await asyncio.to_thread(inspect_image, target, settings.max_image_pixels, label)
+            saved.append(SavedFile(target, label, size, None))
+        elif kind == "overlay_image":
+            await asyncio.to_thread(
+                inspect_image,
+                target,
+                settings.max_image_pixels,
+                label,
+                allowed_kinds={"jpeg", "png"},
+            )
             saved.append(SavedFile(target, label, size, None))
         elif kind in _OFFICE_KINDS:
             target = await asyncio.to_thread(prepare_office, target, label, _OFFICE_KINDS[kind])

@@ -208,6 +208,445 @@ export function ToolOptionsForm({ tool, options, onChange }: ToolOptionsFormProp
       </div>
     );
   }
+  if (tool.slug === "protect-pdf") {
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="protect-password">
+              Open password
+            </label>
+            <input
+              id="protect-password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Enter password"
+              value={options.password}
+              onChange={(event) => onChange({ ...options, password: event.target.value })}
+              className={cn(fieldClass, "mt-1.5")}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="protect-owner-password">
+              Owner password (optional)
+            </label>
+            <input
+              id="protect-owner-password"
+              type="password"
+              autoComplete="new-password"
+              placeholder="Defaults to open password"
+              value={options.ownerPassword}
+              onChange={(event) => onChange({ ...options, ownerPassword: event.target.value })}
+              className={cn(fieldClass, "mt-1.5")}
+            />
+          </div>
+        </div>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-ink">Document permissions</legend>
+          <div className="flex flex-wrap gap-4 pt-1 text-sm text-ink">
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={options.allowPrint}
+                onChange={(event) => onChange({ ...options, allowPrint: event.target.checked })}
+                className="h-4 w-4 accent-primary"
+              />
+              Allow printing
+            </label>
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={options.allowCopy}
+                onChange={(event) => onChange({ ...options, allowCopy: event.target.checked })}
+                className="h-4 w-4 accent-primary"
+              />
+              Allow copying text &amp; images
+            </label>
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={options.allowModify}
+                onChange={(event) => onChange({ ...options, allowModify: event.target.checked })}
+                className="h-4 w-4 accent-primary"
+              />
+              Allow editing
+            </label>
+          </div>
+        </fieldset>
+        <p className="text-xs text-muted">Encrypted with AES-256. Passwords are never stored or logged.</p>
+      </div>
+    );
+  }
+  if (tool.slug === "unlock-pdf") {
+    return (
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-ink" htmlFor="unlock-password">
+            Current PDF password
+          </label>
+          <input
+            id="unlock-password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Enter the password that opens this PDF"
+            value={options.password}
+            onChange={(event) => onChange({ ...options, password: event.target.value })}
+            className={cn(fieldClass, "mt-1.5")}
+          />
+        </div>
+        <label className="flex items-start gap-2.5 text-sm text-ink">
+          <input
+            type="checkbox"
+            checked={options.unlockAuthorized}
+            onChange={(event) => onChange({ ...options, unlockAuthorized: event.target.checked })}
+            className="mt-1 h-4 w-4 accent-primary"
+          />
+          <span>I confirm I am authorized to remove the password from this document.</span>
+        </label>
+      </div>
+    );
+  }
+  if (tool.slug === "repair-pdf") {
+    return (
+      <p className="text-sm text-muted">
+        Attempts structural cross-reference recovery and Ghostscript re-distillation. Only a validated, readable PDF is returned.
+      </p>
+    );
+  }
+  if (tool.slug === "page-numbers") {
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="pn-position">
+              Position
+            </label>
+            <select
+              id="pn-position"
+              value={options.numberPosition}
+              onChange={(event) =>
+                onChange({ ...options, numberPosition: event.target.value as ToolOptions["numberPosition"] })
+              }
+              className={cn(fieldClass, "mt-1.5")}
+            >
+              <option value="bottom-center">Bottom center</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="bottom-right">Bottom right</option>
+              <option value="top-center">Top center</option>
+              <option value="top-left">Top left</option>
+              <option value="top-right">Top right</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="pn-format">
+              Format
+            </label>
+            <select
+              id="pn-format"
+              value={options.numberFormat}
+              onChange={(event) =>
+                onChange({ ...options, numberFormat: event.target.value as ToolOptions["numberFormat"] })
+              }
+              className={cn(fieldClass, "mt-1.5")}
+            >
+              <option value="number">1, 2, 3</option>
+              <option value="page_of_total">1 / 5</option>
+              <option value="page_n">Page 1</option>
+              <option value="page_n_of_total">Page 1 of 5</option>
+            </select>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-4">
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="pn-start">
+              Start at
+            </label>
+            <input
+              id="pn-start"
+              type="number"
+              min={1}
+              max={10000}
+              value={options.startNumber}
+              onChange={(event) => onChange({ ...options, startNumber: event.target.value })}
+              className={cn(fieldClass, "mt-1.5")}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="pn-font">
+              Font
+            </label>
+            <select
+              id="pn-font"
+              value={options.fontName}
+              onChange={(event) => onChange({ ...options, fontName: event.target.value as ToolOptions["fontName"] })}
+              className={cn(fieldClass, "mt-1.5")}
+            >
+              <option value="helv">Helvetica</option>
+              <option value="tiro">Times</option>
+              <option value="cour">Courier</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="pn-size">
+              Size (pt)
+            </label>
+            <input
+              id="pn-size"
+              type="number"
+              min={8}
+              max={36}
+              value={options.fontSize}
+              onChange={(event) => onChange({ ...options, fontSize: event.target.value })}
+              className={cn(fieldClass, "mt-1.5")}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="pn-color">
+              Color
+            </label>
+            <input
+              id="pn-color"
+              type="color"
+              value={options.color}
+              onChange={(event) => onChange({ ...options, color: event.target.value })}
+              className={cn(fieldClass, "mt-1.5 p-1")}
+            />
+          </div>
+        </div>
+        <ChoiceRow label="Pages">
+          <Choice label="All pages" selected={options.pageMode === "all"} onClick={() => onChange({ ...options, pageMode: "all" })} />
+          <Choice label="Custom range" selected={options.pageMode === "custom"} onClick={() => onChange({ ...options, pageMode: "custom" })} />
+        </ChoiceRow>
+        {options.pageMode === "custom" && (
+          <input
+            value={options.pages}
+            onChange={(event) => onChange({ ...options, pages: event.target.value })}
+            placeholder="2-10"
+            className={fieldClass}
+          />
+        )}
+      </div>
+    );
+  }
+  if (tool.slug === "watermark-pdf") {
+    return (
+      <div className="space-y-4">
+        <ChoiceRow label="Watermark type">
+          <Choice
+            label="Text watermark"
+            selected={options.watermarkMode === "text"}
+            onClick={() => onChange({ ...options, watermarkMode: "text" })}
+          />
+          <Choice
+            label="Image watermark"
+            selected={options.watermarkMode === "image"}
+            onClick={() => onChange({ ...options, watermarkMode: "image" })}
+          />
+        </ChoiceRow>
+        {options.watermarkMode === "text" ? (
+          <div className="grid gap-4 sm:grid-cols-[1fr_7rem_5rem]">
+            <div>
+              <label className="block text-sm font-medium text-ink" htmlFor="wm-text">
+                Watermark text
+              </label>
+              <input
+                id="wm-text"
+                value={options.watermarkText}
+                maxLength={120}
+                onChange={(event) => onChange({ ...options, watermarkText: event.target.value })}
+                placeholder="CONFIDENTIAL"
+                className={cn(fieldClass, "mt-1.5")}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-ink" htmlFor="wm-font-size">
+                Size
+              </label>
+              <input
+                id="wm-font-size"
+                type="number"
+                min={12}
+                max={120}
+                value={options.fontSize === "11" ? "48" : options.fontSize}
+                onChange={(event) => onChange({ ...options, fontSize: event.target.value })}
+                className={cn(fieldClass, "mt-1.5")}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-ink" htmlFor="wm-color">
+                Color
+              </label>
+              <input
+                id="wm-color"
+                type="color"
+                value={options.color}
+                onChange={(event) => onChange({ ...options, color: event.target.value })}
+                className={cn(fieldClass, "mt-1.5 p-1")}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-ink" htmlFor="wm-image">
+                Watermark image (PNG or JPG)
+              </label>
+              <input
+                id="wm-image"
+                type="file"
+                accept="image/png,image/jpeg,.png,.jpg,.jpeg"
+                onChange={(event) =>
+                  onChange({ ...options, watermarkImage: event.target.files?.[0] ?? null })
+                }
+                className="mt-1.5 block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-primary-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-ink" htmlFor="wm-scale">
+                Width ({Math.round(Number(options.watermarkScale) * 100)}% of page)
+              </label>
+              <input
+                id="wm-scale"
+                type="range"
+                min={0.1}
+                max={0.85}
+                step={0.05}
+                value={options.watermarkScale}
+                onChange={(event) => onChange({ ...options, watermarkScale: event.target.value })}
+                className="mt-3 w-full accent-primary"
+              />
+            </div>
+          </div>
+        )}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="wm-pos">
+              Position
+            </label>
+            <select
+              id="wm-pos"
+              value={options.watermarkPosition}
+              onChange={(event) =>
+                onChange({ ...options, watermarkPosition: event.target.value as ToolOptions["watermarkPosition"] })
+              }
+              className={cn(fieldClass, "mt-1.5")}
+            >
+              <option value="center">Center</option>
+              <option value="tile">Tile across page</option>
+              <option value="top-left">Top left</option>
+              <option value="top-center">Top center</option>
+              <option value="top-right">Top right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="bottom-center">Bottom center</option>
+              <option value="bottom-right">Bottom right</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="wm-opacity">
+              Opacity ({Math.round(Number(options.watermarkOpacity) * 100)}%)
+            </label>
+            <input
+              id="wm-opacity"
+              type="range"
+              min={0.1}
+              max={1}
+              step={0.05}
+              value={options.watermarkOpacity}
+              onChange={(event) => onChange({ ...options, watermarkOpacity: event.target.value })}
+              className="mt-3 w-full accent-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="wm-rot">
+              Rotation ({options.watermarkRotation}°)
+            </label>
+            <input
+              id="wm-rot"
+              type="range"
+              min={-90}
+              max={90}
+              step={5}
+              value={options.watermarkRotation}
+              onChange={(event) => onChange({ ...options, watermarkRotation: event.target.value })}
+              className="mt-3 w-full accent-primary"
+            />
+          </div>
+        </div>
+        {options.watermarkMode === "text" && (
+          <div className="rounded-2xl border border-dashed border-line bg-paper/60 p-4 text-center">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted">Preview</p>
+            <div className="mt-2 flex h-16 items-center justify-center overflow-hidden">
+              <span
+                className="font-bold select-none"
+                style={{
+                  color: options.color,
+                  opacity: Number(options.watermarkOpacity),
+                  transform: `rotate(${options.watermarkRotation}deg)`,
+                  fontSize: "1.25rem",
+                }}
+              >
+                {options.watermarkText || "WATERMARK"}
+              </span>
+            </div>
+          </div>
+        )}
+        <ChoiceRow label="Pages">
+          <Choice label="All pages" selected={options.pageMode === "all"} onClick={() => onChange({ ...options, pageMode: "all" })} />
+          <Choice label="Custom range" selected={options.pageMode === "custom"} onClick={() => onChange({ ...options, pageMode: "custom" })} />
+        </ChoiceRow>
+        {options.pageMode === "custom" && (
+          <input
+            value={options.pages}
+            onChange={(event) => onChange({ ...options, pages: event.target.value })}
+            placeholder="1, 3-5"
+            className={fieldClass}
+          />
+        )}
+      </div>
+    );
+  }
+  if (tool.slug === "ocr-pdf") {
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-ink" htmlFor="ocr-lang">
+              Document language
+            </label>
+            <select
+              id="ocr-lang"
+              value={options.ocrLanguage}
+              onChange={(event) => onChange({ ...options, ocrLanguage: event.target.value })}
+              className={cn(fieldClass, "mt-1.5")}
+            >
+              <option value="eng">English (eng)</option>
+              <option value="spa">Spanish (spa)</option>
+              <option value="fra">French (fra)</option>
+              <option value="deu">German (deu)</option>
+              <option value="ita">Italian (ita)</option>
+              <option value="por">Portuguese (por)</option>
+            </select>
+          </div>
+          <ChoiceRow label="Scan resolution">
+            <Choice label="Standard" hint="150 DPI" selected={options.ocrDpi === 150} onClick={() => onChange({ ...options, ocrDpi: 150 })} />
+            <Choice label="High" hint="200 DPI" selected={options.ocrDpi === 200} onClick={() => onChange({ ...options, ocrDpi: 200 })} />
+          </ChoiceRow>
+        </div>
+        <ChoiceRow label="Pages">
+          <Choice label="All pages" selected={options.pageMode === "all"} onClick={() => onChange({ ...options, pageMode: "all" })} />
+          <Choice label="Custom range" selected={options.pageMode === "custom"} onClick={() => onChange({ ...options, pageMode: "custom" })} />
+        </ChoiceRow>
+        {options.pageMode === "custom" && (
+          <input
+            value={options.pages}
+            onChange={(event) => onChange({ ...options, pages: event.target.value })}
+            placeholder="1-5"
+            className={fieldClass}
+          />
+        )}
+      </div>
+    );
+  }
   return null;
 }
 

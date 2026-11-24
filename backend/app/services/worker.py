@@ -30,16 +30,24 @@ GRACE_SECONDS = 5
 _PRELOAD = [
     "app.services.convert.html_to_pdf",
     "app.services.convert.libreoffice",
+    "app.services.convert.ocr_pdf",
     "app.services.convert.pdf_to_excel",
     "app.services.convert.pdf_to_pdfa",
     "app.services.convert.pdf_to_pptx",
     "app.services.convert.pdf_to_word",
     "app.services.pdf.compress",
+    "app.services.pdf.edit",
     "app.services.pdf.jpg_to_pdf",
     "app.services.pdf.merge",
+    "app.services.pdf.page_numbers",
     "app.services.pdf.pdf_to_jpg",
+    "app.services.pdf.protect",
+    "app.services.pdf.repair",
     "app.services.pdf.rotate",
+    "app.services.pdf.sign",
     "app.services.pdf.split",
+    "app.services.pdf.unlock",
+    "app.services.pdf.watermark",
 ]
 
 _context_lock = threading.Lock()

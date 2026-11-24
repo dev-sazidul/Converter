@@ -34,7 +34,7 @@ export function ToolBrowser({ embedded = false }: { embedded?: boolean }) {
               All PDF tools
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Ready tools process files now. Coming soon tools are labeled and do not upload anything.
+              All 22 PDF tools are ready to process files with automatic cleanup after download.
             </p>
           </>
         )}

@@ -18,6 +18,31 @@ export type ToolOptions = {
   pdfaLevel: "1b" | "2b" | "3b";
   htmlSource: "file" | "url";
   htmlUrl: string;
+  // Protect / Unlock PDF
+  password: string;
+  ownerPassword: string;
+  allowPrint: boolean;
+  allowCopy: boolean;
+  allowModify: boolean;
+  unlockAuthorized: boolean;
+  // Page Numbers
+  numberPosition: "bottom-center" | "bottom-left" | "bottom-right" | "top-center" | "top-left" | "top-right";
+  numberFormat: "number" | "page_of_total" | "page_n" | "page_n_of_total";
+  startNumber: string;
+  fontName: "helv" | "tiro" | "cour";
+  fontSize: string;
+  color: string;
+  // Watermark PDF
+  watermarkMode: "text" | "image";
+  watermarkText: string;
+  watermarkPosition: "center" | "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right" | "tile";
+  watermarkOpacity: string;
+  watermarkRotation: string;
+  watermarkScale: string;
+  watermarkImage: File | null;
+  // OCR PDF
+  ocrLanguage: string;
+  ocrDpi: 150 | 200;
 };
 
 export const defaultOptions: ToolOptions = {
@@ -37,6 +62,27 @@ export const defaultOptions: ToolOptions = {
   pdfaLevel: "2b",
   htmlSource: "file",
   htmlUrl: "",
+  password: "",
+  ownerPassword: "",
+  allowPrint: true,
+  allowCopy: true,
+  allowModify: false,
+  unlockAuthorized: false,
+  numberPosition: "bottom-center",
+  numberFormat: "page_n_of_total",
+  startNumber: "1",
+  fontName: "helv",
+  fontSize: "11",
+  color: "#334155",
+  watermarkMode: "text",
+  watermarkText: "CONFIDENTIAL",
+  watermarkPosition: "center",
+  watermarkOpacity: "0.25",
+  watermarkRotation: "-45",
+  watermarkScale: "0.35",
+  watermarkImage: null,
+  ocrLanguage: "eng",
+  ocrDpi: 150,
 };
 
 const PAGE_TOKEN = /^\d+(-\d+)?$/;
@@ -286,11 +332,54 @@ export function validateOptions(tool: ToolDefinition, options: ToolOptions): str
     const interval = Number(options.interval);
     if (!Number.isInteger(interval) || interval < 1) return "The interval must be at least 1.";
   }
-  if ((tool.slug === "rotate-pdf" || tool.slug === "pdf-to-jpg") && options.pageMode === "custom") {
+  if (
+    (tool.slug === "rotate-pdf" ||
+      tool.slug === "pdf-to-jpg" ||
+      tool.slug === "page-numbers" ||
+      tool.slug === "watermark-pdf" ||
+      tool.slug === "ocr-pdf") &&
+    options.pageMode === "custom"
+  ) {
     return validatePageList(options.pages);
   }
   if (tool.slug === "html-to-pdf" && options.htmlSource === "url") {
     return validateHtmlUrl(options.htmlUrl);
+  }
+  if (tool.slug === "protect-pdf") {
+    if (!options.password || options.password.length > 128) {
+      return "Enter a password between 1 and 128 characters.";
+    }
+    if (options.ownerPassword.length > 128) {
+      return "The owner password must be 128 characters or fewer.";
+    }
+  }
+  if (tool.slug === "unlock-pdf") {
+    if (!options.unlockAuthorized) {
+      return "Confirm that you are authorized to remove the password from this PDF.";
+    }
+    if (!options.password || options.password.length > 128) {
+      return "Enter the PDF password.";
+    }
+  }
+  if (tool.slug === "page-numbers") {
+    const start = Number(options.startNumber);
+    if (!Number.isInteger(start) || start < 1 || start > 10000) {
+      return "Starting number must be between 1 and 10000.";
+    }
+    const size = Number(options.fontSize);
+    if (!Number.isInteger(size) || size < 8 || size > 36) {
+      return "Font size must be between 8 and 36.";
+    }
+  }
+  if (tool.slug === "watermark-pdf") {
+    if (options.watermarkMode === "text") {
+      const txt = options.watermarkText.trim();
+      if (!txt || txt.length > 120) {
+        return "Enter watermark text between 1 and 120 characters.";
+      }
+    } else if (!options.watermarkImage) {
+      return "Upload a PNG or JPG watermark image.";
+    }
   }
   return null;
 }
@@ -322,5 +411,44 @@ export function appendOptions(form: FormData, tool: ToolDefinition, options: Too
     form.set("source", options.htmlSource);
     form.set("url", options.htmlSource === "url" ? options.htmlUrl.trim() : "");
     form.set("page_size", options.pageSize === "letter" ? "letter" : "a4");
+  }
+  if (tool.slug === "protect-pdf") {
+    form.set("user_password", options.password);
+    form.set("owner_password", options.ownerPassword);
+    form.set("allow_print", options.allowPrint ? "true" : "false");
+    form.set("allow_copy", options.allowCopy ? "true" : "false");
+    form.set("allow_modify", options.allowModify ? "true" : "false");
+  }
+  if (tool.slug === "unlock-pdf") {
+    form.set("password", options.password);
+    form.set("authorized", options.unlockAuthorized ? "true" : "false");
+  }
+  if (tool.slug === "page-numbers") {
+    form.set("position", options.numberPosition);
+    form.set("format", options.numberFormat);
+    form.set("start_number", options.startNumber.trim() || "1");
+    form.set("font", options.fontName);
+    form.set("font_size", options.fontSize.trim() || "11");
+    form.set("color", options.color);
+    form.set("pages", options.pageMode === "all" ? "all" : options.pages.trim());
+  }
+  if (tool.slug === "watermark-pdf") {
+    form.set("mode", options.watermarkMode);
+    form.set("text", options.watermarkText.trim());
+    form.set("font_size", options.fontSize.trim() || "48");
+    form.set("color", options.color);
+    form.set("opacity", options.watermarkOpacity);
+    form.set("rotation", options.watermarkRotation);
+    form.set("position", options.watermarkPosition);
+    form.set("scale", options.watermarkScale);
+    form.set("pages", options.pageMode === "all" ? "all" : options.pages.trim());
+    if (options.watermarkMode === "image" && options.watermarkImage) {
+      form.set("watermark_image", options.watermarkImage, options.watermarkImage.name);
+    }
+  }
+  if (tool.slug === "ocr-pdf") {
+    form.set("language", options.ocrLanguage);
+    form.set("dpi", String(options.ocrDpi));
+    form.set("pages", options.pageMode === "all" ? "all" : options.pages.trim());
   }
 }

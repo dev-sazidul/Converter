@@ -25,7 +25,7 @@ describe("formatBytes", () => {
 describe("tool registry", () => {
   it("publishes the working tools with endpoints and unique urls", () => {
     const ready = availableTools();
-    expect(ready).toHaveLength(14);
+    expect(ready).toHaveLength(22);
     expect(ready.map((tool) => tool.slug)).toEqual(
       expect.arrayContaining([
         "pdf-to-word",
