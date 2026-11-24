@@ -53,8 +53,13 @@ services:
     # LibreOffice and Chromium use a lot of memory. A runaway job is stopped here
     # instead of pushing the whole VM into swap.
     mem_limit: ${BACKEND_MEM_LIMIT:-2g}
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
+    networks:
+      - internal_net
+      - egress_net
 
   frontend:
     build:
@@ -109,8 +114,13 @@ services:
     restart: unless-stopped
     init: true
     mem_limit: ${FRONTEND_MEM_LIMIT:-768m}
+    cap_drop:
+      - ALL
     security_opt:
       - no-new-privileges:true
+    networks:
+      - internal_net
+      - public_net
 
   postgres:
     profiles: ["full"]
@@ -141,3 +151,14 @@ volumes:
   storage:
   database:
   postgres:
+
+# internal_net has no internet egress; egress_net carries backend HTML-to-PDF public fetches.
+# Enforce OS/cloud firewall rules (see docs/SECURITY.md) on the host DOCKER-USER chain
+# to drop private, loopback, link-local, and metadata IP egress from egress_net.
+networks:
+  internal_net:
+    internal: true
+  egress_net:
+    driver_opts:
+      com.docker.network.bridge.name: br-bc-egress
+  public_net:

@@ -5,7 +5,6 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Link, NavLink } from "@/components/ui/Link";
 import { MoreMenu } from "@/components/layout/MoreMenu";
-import { ConvertSection } from "@/components/tools/ConvertSection";
 import { Logo } from "@/components/ui/Logo";
 import { availableTools, tools } from "@/lib/tools";
 import { cn, container, focusRing } from "@/lib/utils";
@@ -19,7 +18,7 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 
 export function Header() {
   const pathname = usePathname();
-  const onConvertPage = pathname === "/convert-pdf";
+  const onToolsPage = pathname === "/tools";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
@@ -77,33 +76,26 @@ export function Header() {
               className={cn(
                 "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary-soft",
                 focusRing,
-                convertOpen || onConvertPage ? "text-primary" : "text-ink/80",
+                convertOpen || onToolsPage ? "text-primary" : "text-ink/80",
               )}
               aria-expanded={convertOpen}
               aria-haspopup="true"
-              aria-controls="convert-pdf-menu"
+              aria-controls="all-tools-menu"
               onClick={() => {
                 setMoreOpen(false);
                 setConvertOpen((open) => !open);
               }}
             >
-              Convert PDF
+              All tools
               <ChevronDown className={cn("h-4 w-4 transition-transform", convertOpen && "rotate-180")} aria-hidden="true" />
             </button>
             {convertOpen && (
               <div
-                id="convert-pdf-menu"
-                className="absolute right-0 top-12 w-[40rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-white p-6 shadow-card"
+                id="all-tools-menu"
+                className="fixed inset-x-4 top-16 z-40 mx-auto max-h-[min(36rem,calc(100vh-5.5rem))] w-[min(56rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-line bg-white p-5 shadow-card"
                 role="menu"
               >
-                <ConvertSection variant="menu" onNavigate={() => setConvertOpen(false)} />
-                <Link
-                  to="/convert-pdf"
-                  className={cn("mt-4 inline-flex text-sm font-medium text-primary hover:underline", focusRing, "rounded-sm")}
-                  onClick={() => setConvertOpen(false)}
-                >
-                  Open the Convert PDF page
-                </Link>
+                <MoreMenu onNavigate={() => setConvertOpen(false)} />
               </div>
             )}
           </div>
@@ -164,8 +156,8 @@ export function Header() {
             <NavLink to="/" end className={linkClass} onClick={() => setMobileOpen(false)}>
               Home
             </NavLink>
-            <NavLink to="/convert-pdf" className={linkClass} onClick={() => setMobileOpen(false)}>
-              Convert PDF
+            <NavLink to="/tools" className={linkClass} onClick={() => setMobileOpen(false)}>
+              All tools
             </NavLink>
             <NavLink to="/blog" className={linkClass} onClick={() => setMobileOpen(false)}>
               Blog

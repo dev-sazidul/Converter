@@ -1,13 +1,11 @@
 """Render HTML or a public web page to PDF with Chromium.
 
 Uploaded documents are rendered from memory with JavaScript and network
-access turned off. Web pages may load public resources, and every request
-is checked again so a redirect cannot reach a private address or a local file.
-Service workers and WebSockets are blocked because request routing can't see them.
-
-The address check resolves DNS separately from Chromium, so a DNS-rebinding
-domain can still slip past it. Block private and link-local ranges for this
-container at the network level as well. See "Production" in the README.
+access turned off. Web pages may load public resources, and every HTTP(S)
+request is intercepted by Playwright and executed via ``fetch_pinned_public_url``
+so DNS is resolved and validated once per hop in Python and pinned at the
+socket level. Chromium itself is launched with ``--host-resolver-rules=MAP * ~NOTFOUND``
+so it cannot perform independent DNS lookups.
 """
 
 from __future__ import annotations
@@ -20,7 +18,11 @@ import pymupdf
 from app.config import get_settings
 from app.errors import AppError, ProcessingFailedError
 from app.services.convert.formats import read_html_text
-from app.services.convert.html_policy import normalize_public_url, sanitize_uploaded_html
+from app.services.convert.html_policy import (
+    fetch_pinned_public_url,
+    normalize_public_url,
+    sanitize_uploaded_html,
+)
 from app.services.jobs import ProcessResult, SavedFile
 from app.services.pdf.packaging import stem_name
 
@@ -34,6 +36,7 @@ _CHROMIUM_ARGS = [
     "--disable-background-networking",
     "--no-first-run",
     "--disable-sync",
+    "--host-resolver-rules=MAP * ~NOTFOUND",
 ]
 
 
@@ -62,6 +65,7 @@ def html_url_to_pdf(url: str, directory: Path, *, page_size: str) -> ProcessResu
 def _render(directory: Path, *, page_size: str, html: str | None, url: str | None) -> Path:
     settings = get_settings()
     timeout_ms = max(1000, settings.html_navigation_timeout_seconds * 1000)
+    timeout_s = max(5.0, float(settings.html_navigation_timeout_seconds))
     destination = directory / "output.pdf"
     try:
         from playwright.sync_api import TimeoutError as PlaywrightTimeout
@@ -78,14 +82,19 @@ def _render(directory: Path, *, page_size: str, html: str | None, url: str | Non
                     java_script_enabled=url is not None,
                     accept_downloads=False,
                     ignore_https_errors=False,
-                    # Requests made by a service worker skip page.route, so the address check would not see them.
                     service_workers="block",
                 )
-                # WebSockets are not covered by page.route either. A printed page doesn't need them.
                 context.route_web_socket("**/*", lambda socket: socket.close())
                 page = context.new_page()
                 page.set_default_timeout(timeout_ms)
-                page.route("**/*", lambda route: _route(route, allow_network=url is not None))
+                page.route(
+                    "**/*",
+                    lambda route: _route(
+                        route,
+                        allow_network=url is not None,
+                        timeout_s=timeout_s,
+                    ),
+                )
                 if html is not None:
                     page.set_content(html, wait_until="domcontentloaded", timeout=timeout_ms)
                 else:
@@ -116,7 +125,7 @@ def _render(directory: Path, *, page_size: str, html: str | None, url: str | Non
     return destination
 
 
-def _route(route, *, allow_network: bool) -> None:
+def _route(route, *, allow_network: bool, timeout_s: float) -> None:
     target = route.request.url
     if target.startswith(("about:", "data:", "blob:")):
         if allow_network or target.startswith(("about:", "data:")):
@@ -128,11 +137,21 @@ def _route(route, *, allow_network: bool) -> None:
         route.abort()
         return
     try:
-        normalize_public_url(target)
+        status, resp_headers, body = fetch_pinned_public_url(
+            target,
+            method=route.request.method,
+            headers=route.request.headers,
+            timeout=min(15.0, timeout_s),
+        )
     except AppError:
         route.abort()
         return
-    route.continue_()
+    except Exception:
+        route.abort()
+        return
+
+    content_type = resp_headers.get("content-type", "application/octet-stream")
+    route.fulfill(status=status, content_type=content_type, body=body)
 
 
 def _pages(path: Path) -> int:
