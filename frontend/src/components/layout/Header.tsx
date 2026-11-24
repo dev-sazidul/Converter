@@ -112,15 +112,6 @@ export function Header() {
           <Link to="/help" className={cn("rounded-lg px-3 py-2 text-sm font-medium text-ink/80 hover:bg-primary-soft", focusRing)}>
             Help
           </Link>
-          <button type="button" className={cn("rounded-lg px-3 py-2 text-sm font-medium text-ink/80 hover:bg-primary-soft", focusRing)}>
-            Login
-          </button>
-          <button
-            type="button"
-            className={cn("rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark", focusRing)}
-          >
-            Sign up
-          </button>
           <div className="relative" ref={moreRef}>
             <button
               type="button"
@@ -200,12 +191,6 @@ export function Header() {
                 <MoreMenu onNavigate={() => setMobileOpen(false)} />
               </div>
             )}
-            <button type="button" className={cn("rounded-lg px-3 py-2 text-left text-sm font-medium text-ink/80 hover:bg-primary-soft", focusRing)}>
-              Login
-            </button>
-            <button type="button" className={cn("w-fit rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark", focusRing)}>
-              Sign up
-            </button>
           </div>
         </nav>
       )}
