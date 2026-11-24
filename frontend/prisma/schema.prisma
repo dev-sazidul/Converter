@@ -33,3 +33,19 @@ model Job {
   @@index([createdAt])
   @@index([status])
 }
+
+/// Contact form submission from /contact.
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  ipHash    String?
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+  @@index([ipHash, createdAt])
+}

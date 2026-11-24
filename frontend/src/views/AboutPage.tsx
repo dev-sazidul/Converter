@@ -1,6 +1,7 @@
 import { AdSlot } from "@/components/ads/AdSlot";
 import { EcosystemTools } from "@/components/layout/EcosystemTools";
-import { container } from "@/lib/utils";
+import { Link } from "@/components/ui/Link";
+import { container, focusRing } from "@/lib/utils";
 
 export function AboutPage() {
   return (
@@ -17,6 +18,13 @@ export function AboutPage() {
         </p>
         <p>
           OCR, signatures, and editing are listed so the catalog is easy to scan. They are labeled Coming soon and do not pretend to process a file.
+        </p>
+        <p>
+          Have a question, bug report, or feedback? Reach out through our{" "}
+          <Link to="/contact" className={`font-semibold text-primary underline-offset-2 hover:underline ${focusRing} rounded-sm`}>
+            Contact page
+          </Link>
+          .
         </p>
       </div>
 

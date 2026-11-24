@@ -30,11 +30,13 @@ describe("page metadata", () => {
     expect(statusForPath("/merge-pdf")).toBe(200);
     expect(statusForPath("/not-a-tool")).toBe(404);
     expect(statusForPath("/help")).toBe(200);
+    expect(statusForPath("/contact")).toBe(200);
   });
 
   it("lists indexable URLs and leaves coming soon tools out of the sitemap", () => {
     const paths = publicPaths();
     expect(paths).toContain("/");
+    expect(paths).toContain("/contact");
     expect(paths).toContain("/merge-pdf");
     expect(paths).toContain("/pdf-to-pdfa");
     expect(paths).not.toContain("/sign-pdf");

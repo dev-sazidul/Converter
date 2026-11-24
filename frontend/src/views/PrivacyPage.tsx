@@ -2,7 +2,8 @@
 
 import { AdSlot } from "@/components/ads/AdSlot";
 import { useLimits } from "@/components/limits/LimitsProvider";
-import { container } from "@/lib/utils";
+import { Link } from "@/components/ui/Link";
+import { container, focusRing } from "@/lib/utils";
 
 export function PrivacyPage() {
   const limits = useLimits();
@@ -27,6 +28,13 @@ export function PrivacyPage() {
         </p>
         <p>
           The site shows advertisements so the tools can stay free. Until an AdSense publisher id is added, those spaces use demo images. A separate popup shows a demo image or video and can be closed at any time. When AdSense is turned on, Google may set cookies to measure and choose ads. AdSense is not placed inside the popup.
+        </p>
+        <p>
+          If you have questions about how temporary files or privacy are handled, please reach out via our{" "}
+          <Link to="/contact" className={`font-semibold text-primary underline-offset-2 hover:underline ${focusRing} rounded-sm`}>
+            Contact page
+          </Link>
+          .
         </p>
       </div>
     </article>

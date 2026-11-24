@@ -1,5 +1,6 @@
 import { AdSlot } from "@/components/ads/AdSlot";
-import { container } from "@/lib/utils";
+import { Link } from "@/components/ui/Link";
+import { container, focusRing } from "@/lib/utils";
 
 export function TermsPage() {
   return (
@@ -19,6 +20,13 @@ export function TermsPage() {
         </p>
         <p>
           Tools marked Coming soon are descriptions of planned work. They do not accept files. The site may show advertisements around the tools. Closing a popup ad does not change how your files are processed.
+        </p>
+        <p>
+          For questions about these terms or to report a service issue, please use our{" "}
+          <Link to="/contact" className={`font-semibold text-primary underline-offset-2 hover:underline ${focusRing} rounded-sm`}>
+            Contact page
+          </Link>
+          .
         </p>
       </div>
     </article>

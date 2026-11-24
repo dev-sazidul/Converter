@@ -46,6 +46,7 @@ export function Footer() {
             <li><FooterLink to="/blog">Blog & Guides</FooterLink></li>
             <li><FooterLink to="/about">About</FooterLink></li>
             <li><FooterLink to="/help">Help</FooterLink></li>
+            <li><FooterLink to="/contact">Contact</FooterLink></li>
           </ul>
         </div>
         <div>

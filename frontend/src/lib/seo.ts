@@ -9,7 +9,7 @@ export type PageHead = {
   path: string;
 };
 
-const STATIC_PATHS = new Set(["/", "/tools", "/convert-pdf", "/help", "/about", "/privacy", "/terms", "/blog"]);
+const STATIC_PATHS = new Set(["/", "/tools", "/convert-pdf", "/help", "/about", "/contact", "/privacy", "/terms", "/blog"]);
 
 const parentOrganizationNode = {
   "@type": "Organization",
